@@ -1,11 +1,11 @@
 ---
 name: dev
-description: "Senior engineer. Scouts the codebase, clarifies requirements, proposes test cases, then implements with strict TDD in 4 modes (agent-pair, solo, pair-with-me, agent-team). Accepts a prompt, issue URL, PRD file, or no args. Use when: dev, implement, build this, code this, tdd, let's build, pick a task, next task, implement feature, start coding, pair, dojo, team."
+description: "Senior engineer. Scouts the codebase, clarifies requirements, proposes test cases, then implements with strict TDD in 3 modes (agent-pair, solo, pair-with-me). Accepts a prompt, issue URL, PRD file, or no args. Use when: dev, implement, build this, code this, tdd, let's build, pick a task, next task, implement feature, start coding, pair, dojo."
 ---
 
 # Dev
 
-Senior Software Engineer. Does product-dev work (understand, scout, clarify, plan) before any code. Then implements with strict TDD in one of 4 modes.
+Senior Software Engineer. Does product-dev work (understand, scout, clarify, plan) before any code. Then implements with strict TDD in one of 3 modes.
 
 ## Usage
 
@@ -69,7 +69,6 @@ This is the last gate. After approval, switch to execution mode.
 
 - `solo`, `I drive` → Mode 2
 - `pair with me`, `pair`, `dojo` → Mode 3
-- `team`, `agent team` → Mode 4 (requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`; fail fast if unset)
 
 Create a feature branch, then enter the selected mode:
 
@@ -167,51 +166,6 @@ fswatch -1 <file_or_dir>
 ```
 
 Cycle: spawn watcher → wait → run tests → read context → display results → spawn again. Loop ends only when the user says stop.
-
----
-
-## Mode 4: agent-team (experimental)
-
-Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Triggered by `team` or `agent team` in the prompt.
-
-Spawn a 2-teammate Claude Code team that persists across the full TDD cycle. Both teammates keep their context from turn to turn. No re-briefing per step; the driver remembers every past test, the navigator remembers every past gate.
-
-### Setup
-
-After Phase 4 approval:
-
-1. `git checkout -b feature/{short-name}`.
-2. Spawn the team with 2 teammates, reusing existing agent definitions:
-   - **driver** — `agentType: tdd-driver` (sonnet-4-6)
-   - **navigator** — `agentType: tdd-navigator` (sonnet-4-6)
-3. The spawn prompt for each teammate must carry: requirements, scout summary, the approved initial test plan, and project context. The lead's conversation history does not propagate; briefings must be self-contained. CLAUDE.md is loaded automatically.
-
-### Turn protocol
-
-Same 8-step cycle as Mode 1, but each turn is a `SendMessage` to an existing teammate rather than a fresh subagent spawn:
-
-1. Lead → driver: "Emit test idea for case N."
-2. Lead → navigator: driver's idea. Navigator gates.
-3. If gate passed, lead → driver: "Write the test. Share output."
-4. Lead → navigator: driver's output. Navigator verifies RED is legitimate.
-5. Lead → driver: "Emit impl idea."
-6. Lead → navigator: driver's impl idea. Navigator gates minimum-change.
-7. If gate passed, lead → driver: "Write impl. Run tests. Share GREEN."
-8. Lead → navigator: driver's output. Navigator scans for removable code, then approves commit.
-9. Lead uses `/commit`.
-
-The lead orchestrates the ping-pong and interrupts only on escalation.
-
-### Completion
-
-Run the full test suite. Report tests passed, files changed, commits made. Ask the lead to clean up the team.
-
-### Caveats
-
-- **Token cost**: each teammate is a full Claude Code session running continuously. Short features (1–3 tests) likely cost more than Mode 1; longer features (5+ tests) likely cost less due to context reuse.
-- **No session resume**: `/resume` does not restore in-process teammates.
-- **Agent-def `skills` and `mcpServers` frontmatter are ignored in team mode.** Only `tools` and `model` are honored. Teammates load skills and MCP servers from project/user settings like a regular session.
-- **One team per session.** Clean up the current team before starting another.
 
 ---
 
