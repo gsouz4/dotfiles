@@ -37,6 +37,14 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 
 `zsh`, `git`, `tmux`, `tool-versions`, `nvim`, `claude`, `pi`, `direnv`, `ssh`, `local-bin`, `ghostty`, `tig`
 
+## Working on this repo
+
+- Never commit `claude/.claude/settings.json` (machine-specific permissions). Only `settings.local.json` is portable and tracked.
+- Stage files explicitly with `git add <file>`. Never `git add -A` or `git add .`.
+- After moving files between stow packages, run `make restow` to refresh symlinks.
+- Run `make lint` before pushing. It catches hardcoded paths that break portability across machines.
+- Adding a new package: create the dir, mirror home structure, add to `PACKAGES` in the Makefile, then `make stow-<pkg>`.
+
 ## Claude Code config
 
 Lives in `claude/.claude/`. Stowed to `~/.claude/`.
@@ -48,13 +56,9 @@ Lives in `claude/.claude/`. Stowed to `~/.claude/`.
 
 ### Skills (shared with pi)
 
-`/vault`, `/note`, `/recap`, `/brainstorm`, `/task`, `/pair`, `/skill-creator`, `/pair-review`, `/qa`, `/browser`
+`/vault`, `/note`, `/recap`, `/skill-creator`, `/qa`, `/browser`
 
 `~/.claude/skills` is a directory-level symlink to `claude/.claude/skills/`. New skills appear automatically without restow.
-
-### MCP servers
-
-- `chrome-devtools` — defined in `~/.mcp.json` (stowed from `claude/.mcp.json`)
 
 ## Pi config
 

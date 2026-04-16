@@ -17,7 +17,8 @@ Use `agent-browser` to open the page and extract metrics via JavaScript Performa
 
 ```bash
 agent-browser open <url>
-agent-browser wait --load networkidle
+agent-browser wait "body"
+agent-browser eval "document.readyState"   # should print "complete"
 ```
 
 ### Step 2: Extract Core Web Vitals and page metrics

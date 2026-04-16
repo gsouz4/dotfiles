@@ -5,9 +5,5 @@
       "Bash(qmd embed:*)",
       "Bash(fswatch -1 /tmp/devtui-content)"
     ]
-  },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "chrome-devtools"
-  ]
+  }
 }

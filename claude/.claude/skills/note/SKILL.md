@@ -27,7 +27,7 @@ Based on the content, pick the right location:
 |---------|------|----------|
 | Quick thought, unsorted | `inbox/{slug}.md` | note |
 | Blog post idea (one-liner) | Append to `blog/ideas.md` under `## Backlog` | - |
-| Blog post idea (needs exploration) | Suggest `/brainstorm` instead | - |
+| Blog post idea (needs exploration) | Append to `blog/ideas.md` with a short "why" sub-bullet | - |
 | Blog draft (outline ready) | `blog/drafts/{slug}.md` | blog-draft |
 | Something learned today | `learning/til/{slug}.md` | til |
 | Project-specific note | `projects/{project}/{slug}.md` | note |

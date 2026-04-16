@@ -88,7 +88,7 @@ Rules for the reproduction test:
 
 Write the test. Run it. **Confirm RED.**
 
-> 🔴 RED — {error message or assertion failure}
+> RED — {error message or assertion failure}
 >
 > The bug is now captured in a test. Proceeding to fix.
 
@@ -110,7 +110,7 @@ Write the **minimum code** to make the failing test pass. No more.
 
 Run tests. **Confirm GREEN.**
 
-> 🟢 GREEN — Bug fix verified. {n} tests passing.
+> GREEN — Bug fix verified. {n} tests passing.
 
 If the fix is non-obvious, explain briefly:
 
