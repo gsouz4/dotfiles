@@ -1,186 +1,137 @@
 ---
 name: sync
-description: "Detect project stack, create/update project-level agents, skills, and rules based on user-level templates + stack best practices. Idempotent. Use when: sync, forge, tune, setup agents, configure project, init project, bootstrap, prepare project."
+description: "Scout the current project, diff against existing CLAUDE.md and .claude/rules, propose updates to reflect stack and conventions. Idempotent. Does not copy user-level skills or agents (user-level always wins). Use when: sync, forge, tune, init project, bootstrap, prepare project, refresh rules."
 ---
 
 # Sync
 
-Detect the project stack and create/update `.claude/` config (agents, skills, rules) based on user-level templates specialized for the detected stack. Idempotent. Safe to run again.
+Scout the project and update its `CLAUDE.md` and `.claude/rules/` so they reflect current state. Runs safely multiple times — only proposes changes where state and docs diverge.
+
+Does **not** copy user-level skills or agents. Per Claude Code precedence, personal (`~/.claude/skills`) wins over project (`.claude/skills`). Copying creates shadowed duplicates. Skills and agents stay user-level.
 
 ## Usage
 
-- `/sync` - detect stack, sync everything
-- `/sync agents` - only sync agents
-- `/sync skills` - only sync skills
-- `/sync rules` - only sync rules
+- `/sync` — full sync (CLAUDE.md + rules)
+- `/sync rules` — only update `.claude/rules/`
+- `/sync claude` — only update `CLAUDE.md`
 
-## Phase 1: Detect Stack
+## Phase 1: Scout
 
-```bash
-ls mix.exs Gemfile Cargo.toml package.json go.mod pyproject.toml build.gradle pom.xml 2>/dev/null
+Launch the `scout` agent:
+
+> Map this project for a sync pass. Report:
+> - Stack: language + version, framework + version, key deps (read manifests, not just their names)
+> - Commands: test, lint, build, format (Makefile, package.json scripts, mix aliases, Cargo scripts, README)
+> - Test structure: framework, file organization, naming, fixtures
+> - Conventions: naming, error handling, module boundaries (sample 3–5 representative files)
+> - Existing docs: presence of CLAUDE.md, .claude/rules/*, AGENTS.md
+
+Read the scout report.
+
+## Phase 2: Diff
+
+Compare scout findings against what exists in the project.
+
+### CLAUDE.md checks
+
+Read `./CLAUDE.md` (or `./.claude/CLAUDE.md`). Check:
+
+- **Present?** If missing, propose a new one.
+- **Stack matches scout?** If it mentions wrong framework/version, flag drift.
+- **Commands documented?** If scout found build/test/lint commands and CLAUDE.md doesn't mention them, propose adding.
+- **Architecture summary?** If the project has clear bounded contexts that scout identified and CLAUDE.md doesn't reflect, propose a section.
+
+### Rules checks
+
+List `.claude/rules/*.md`. For each detected stack, check:
+
+| Stack | Expected rule | Default globs |
+|---|---|---|
+| Elixir | `elixir.md` | `lib/**/*.ex`, `test/**/*.exs` |
+| Ruby | `ruby.md` | `app/**/*.rb`, `lib/**/*.rb` |
+| Rust | `rust.md` | `src/**/*.rs` |
+| TypeScript | `typescript.md` | `src/**/*.{ts,tsx}` |
+| Go | `go.md` | `**/*.go` |
+| Python | `python.md` | `**/*.py` |
+| Any | `testing.md` | path to test dir detected by scout |
+| Any | `git.md` | no globs (always-on) |
+
+For each missing rule relevant to the detected stack, propose creating it.
+
+For each existing rule, check for obsolete globs (paths that no longer exist) and flag.
+
+## Phase 3: Propose
+
+Present a single summary to the user:
+
+```
+## Sync plan
+
+### CLAUDE.md
+- [create] Missing. Draft attached below.
+- [update] Add "## Commands" section with test/lint/build from scout.
+- [drift] Mentions Phoenix 1.6, scout detected 1.7. Update version.
+
+### Rules
+- [create] .claude/rules/elixir.md — Phoenix/LiveView patterns, anti-patterns.
+- [create] .claude/rules/testing.md — ExUnit conventions from scout.
+- [skip] .claude/rules/git.md — already up to date.
+- [flag]  .claude/rules/legacy.md — glob `old_app/**` matches no files.
+
+Proceed? (y to apply all, s to pick, n to stop)
 ```
 
-Read existing `CLAUDE.md`, `.claude/` directory, `README.md`.
+If `y`, apply all. If `s`, walk through each item one by one. If `n`, stop.
 
-Identify: language, framework, test framework, build commands, linter/formatter, key dependencies.
+## Phase 4: Apply
 
-Present to user:
+For each approved item, show the diff, then write the file. For new files, show the full proposed content before writing.
 
-> **Detected stack:**
-> - Language: {language} {version}
-> - Framework: {framework} {version}
-> - Test: {test_framework}
-> - Linter: {linter}
-> - Key deps: {deps}
->
-> Confirm? (or correct me)
+**Never delete** existing rules or CLAUDE.md content. Only create or update. Preserve custom sections.
 
-**Wait for confirmation.**
+## Phase 5: Report
 
-## Phase 2: Gather Knowledge
+```
+## Sync done
 
-Search the web for stack-specific best practices:
+### Created
+- .claude/rules/elixir.md
 
-- `"{framework} code review checklist {year}"`
-- `"{framework} security best practices"`
-- `"{framework} performance anti-patterns"`
+### Updated
+- CLAUDE.md (added Commands section, bumped Phoenix version)
 
-Read user-level templates from `~/.claude/agents/` and `~/.claude/skills/`.
-Read any existing project-level files to know what's already there.
-
-## Phase 3: Create/Update Agents
-
-```bash
-mkdir -p .claude/agents
+### Flagged (no action taken)
+- .claude/rules/legacy.md — obsolete globs, review manually
 ```
 
-For each user-level agent (`scout`, `quality-reviewer`, `security-reviewer`, `performance-reviewer`, `review-auditor`):
+## Rule file template
 
-1. Read user-level `~/.claude/agents/{name}.md`
-2. Read existing `.claude/agents/{name}.md` if it exists
-3. Generate project-level version:
-   - Same structure and principles from user-level
-   - Add stack-specific sections (language idioms, framework patterns, anti-patterns)
-   - Add project context from `CLAUDE.md` if available
-   - Description prefix: `[ProjectName]`
-   - Same model as user-level
-4. **If file exists and differs, show diff. Ask before overwriting**
-5. If identical, skip
-
-Also create a `plan-reviewer` agent if one doesn't exist.
-
-## Phase 4: Create/Update Skills
-
-```bash
-mkdir -p .claude/skills/{commit,dev,review,po}
-```
-
-For each user-level skill (`commit`, `dev`, `review`, `po`):
-
-1. Read user-level `~/.claude/skills/{name}/SKILL.md`
-2. Read existing project-level version if it exists
-3. Generate project-level version:
-   - Same workflow structure from user-level
-   - Replace generic commands with stack-specific:
-
-| Stack | Test command | Pre-commit | Linter |
-|-------|-------------|------------|--------|
-| Elixir/Phoenix | `mix test` | `mix precommit` or `mix format && mix compile --warnings-as-errors && mix test` | `mix format` |
-| Ruby/Rails | `bundle exec rspec` | `rubocop -a && bundle exec rspec` | `rubocop` |
-| Rust | `cargo test` | `cargo fmt && cargo clippy && cargo test` | `cargo fmt` |
-| JS/TS (Node) | `npm test` or `jest` | `prettier --write . && npm test` | `prettier` / `eslint` |
-| Go | `go test ./...` | `gofmt -w . && go vet ./... && go test ./...` | `gofmt` |
-| Python | `pytest` | `ruff check --fix && pytest` | `ruff` / `black` |
-
-   - Add project-specific workflow from `CLAUDE.md`
-   - Description prefix: `[ProjectName]`
-4. **If file exists and differs, show diff. Ask before overwriting**
-5. If identical, skip
-
-## Phase 5: Create/Update Rules
-
-```bash
-mkdir -p .claude/rules
-```
-
-Generate rule files based on detected stack. Each rule:
+Every rule uses this frontmatter:
 
 ```yaml
 ---
-description: {what this rule covers}
-globs: ["{file patterns}"]
-alwaysApply: false
+description: {one-line purpose}
+paths:
+  - "{glob}"
 ---
 ```
 
-**Rules to generate per stack:**
+Rules without `paths` load always. Rules with `paths` load only when Claude reads matching files. Use `paths` when the rule is language-specific.
 
-### Elixir/Phoenix
-- `elixir.md` — globs: `["lib/**/*.ex", "test/**/*.exs"]` — idioms, Phoenix/LiveView patterns, anti-patterns
-- `testing.md` — globs: `["test/**/*", "lib/**/*"]` — ExUnit conventions, TDD
-- `git.md` — no globs — commit format, staging rules
+## Content guidelines
 
-### Ruby/Rails
-- `ruby.md` — globs: `["app/**/*.rb", "lib/**/*.rb"]` — Rails patterns, service objects, thread safety
-- `testing.md` — globs: `["spec/**/*"]` — RSpec conventions, factories
-- `git.md` — no globs
+Rules should capture **what is true about this project**, not generic best practices. Include:
 
-### Rust
-- `rust.md` — globs: `["src/**/*.rs"]` — ownership patterns, error handling, unsafe rules
-- `testing.md` — globs: `["tests/**/*.rs", "src/**/*.rs"]` — test conventions
-- `git.md` — no globs
+- Naming patterns actually used (from scout sampling)
+- Error handling style actually used
+- Anti-patterns specific to the framework
+- Commands and conventions from CLAUDE.md that apply to matching files
 
-### JS/TS
-- `typescript.md` — globs: `["src/**/*.{ts,tsx,js,jsx}"]` — React/Node patterns, type safety
-- `testing.md` — globs: `["**/*.test.{ts,tsx,js,jsx}", "**/*.spec.{ts,tsx,js,jsx}"]` — Jest/Vitest conventions
-- `git.md` — no globs
-
-### Go / Python / Other
-- Similar pattern: language rule + testing rule + git rule
-
-Include web-searched best practices in rule content. Be specific, not generic.
-
-**If rule files exist and differ, show diff. Ask before overwriting.**
-
-## Phase 6: CLAUDE.md Check
-
-Read existing `CLAUDE.md`. Check for these sections:
-
-- **Skills table** — listing available `/skill` commands
-- **Agents table** — listing custom agents and their purpose
-- **Rules table** — listing rules and their file scope
-- **Commands section** — how to run tests, lint, build
-- **Pipeline diagram** — `/po -> /dev -> /review -> /commit --pr`
-
-For each missing section, propose an addition. Show the proposed content.
-
-**Wait for approval before modifying CLAUDE.md.** Never overwrite existing content.
-
-## Phase 7: Report
-
-```markdown
-## Sync Report
-
-### Created
-- `.claude/agents/scout.md` — [ProjectName] scout with {stack} specifics
-- ...
-
-### Updated
-- `.claude/skills/commit/SKILL.md` — added {stack} test command
-- ...
-
-### Skipped (already up to date)
-- `.claude/rules/git.md`
-- ...
-
-### Manual action needed
-- [ ] Review CLAUDE.md additions
-```
+Skip generic style advice that belongs in a language style guide.
 
 ## Idempotency
 
-- Read before write. Compare existing with generated
-- If identical, skip
-- If different, show diff and ask
-- Never delete. Only create or update
-- Preserve custom content in existing files
+- Read before write. Normalize whitespace when comparing.
+- If generated content matches existing, skip silently.
+- If different, show diff and ask.
+- Never overwrite custom content without diff + approval.
