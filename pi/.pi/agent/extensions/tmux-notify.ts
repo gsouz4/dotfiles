@@ -40,7 +40,7 @@ export default function (pi: ExtensionAPI) {
 		// Highlight session if pi is in a different one
 		if (piSession !== activeSession) {
 			await pi.exec("tmux", ["set-option", "-t", activeSession, "status-left",
-				'#[fg=#FFFFFF,bg=red,bold] #S #[bg=#343F44] ']);
+				'#[fg=#FFFFFF,bg=red,bold] #S #[bg=#2D353B] ']);
 		}
 
 		// Highlight tmux window in status bar
