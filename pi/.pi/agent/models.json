@@ -1,0 +1,11 @@
+{
+  "providers": {
+    "opencode-go": {
+      "modelOverrides": {
+        "glm-5.1": {
+          "input": ["text"]
+        }
+      }
+    }
+  }
+}
