@@ -47,3 +47,6 @@ yolo() {
   claude --allow-dangerously-skip-permissions "$@"
 }
 alias pi="$HOME/.local/share/mise/installs/node/23.9.0/bin/pi"
+
+# opencode
+export PATH=$HOME/.opencode/bin:$PATH
