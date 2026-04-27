@@ -1,12 +1,14 @@
-font-family = ZedMono Nerd Font
-font-size = 18
+font-family = ZedMono Nerd Font Propo
+font-size = 14
+font-style = medium
 
 theme = Gruvbox Dark
 
 cursor-style = block
 cursor-style-blink = false
 
-window-padding-x = 4
+window-padding-x = 10
 window-padding-y = 4
 
-macos-option-as-alt = false
+
+keybind = shift+tab=toggle_fullscreen
