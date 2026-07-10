@@ -10,9 +10,9 @@ status_echo() {
 }
 
 # ---------------------------------------------------------------------
-# 1. System Update, Core Dependencies & Nerd Font Installation
+# 1. System Update, Core Dependencies (with Tmux & VSCodium) & Nerd Font
 # ---------------------------------------------------------------------
-status_echo "Checking System Dependencies..."
+status_echo "Checking System Dependencies & Open-Source VS Code..."
 
 # Only run update if it hasn't been run in the last 24 hours
 if [ -z "$(find /var/lib/apt/lists -mtime -1 -print -quit)" ]; then
@@ -22,9 +22,18 @@ else
     echo "⏭️  [SKIP] Package lists are fresh."
 fi
 
-echo "📦 Ensuring core tools are installed..."
+# Install VSCodium repository if not already present
+if ! command -v codium &> /dev/null; then
+    echo "📦 Adding VSCodium (Open-Source VS Code) Repository..."
+    sudo apt install -y gnupg software-properties-common
+    wget -qO - https://gitlab.com/paulcarroccio/vscodium-deb-rpm-repo/-/raw/master/pub.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/vscodium-archive-keyring.gpg > /dev/null
+    echo 'deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' | sudo tee /usr/share/keyrings/vscodium.list
+    sudo apt update
+fi
+
+echo "📦 Ensuring core tools, tmux, and open-source code are installed..."
 sudo apt install -y \
-    git zsh neovim curl build-essential unzip fzf ripgrep bison \
+    git zsh neovim tmux vscodium curl build-essential unzip fzf ripgrep bison \
     libssl-dev ncurses-dev libncurses5-dev autoconf m4 \
     libwxgtk3.2-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev \
     libssh-dev unixodbc-dev fontconfig
@@ -37,10 +46,7 @@ if [ ! -d "$FONT_DIR" ] || [ -z "$(ls -A "$FONT_DIR" 2>/dev/null)" ]; then
     mkdir -p "$FONT_DIR"
     TEMP_ZIP=$(mktemp)
     
-    # Fetch the latest bundled archive release directly from ryanoasis/nerd-fonts
     curl -fLo "$TEMP_ZIP" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/ZedMono.zip"
-    
-    # Extract only the Propo (Proportional Alternative Layout) variations safely
     unzip -o "$TEMP_ZIP" "*Propo*" -d "$FONT_DIR"
     rm -f "$TEMP_ZIP"
     
@@ -89,9 +95,7 @@ fi
 # ---------------------------------------------------------------------
 status_echo "Checking Configuration Symlinks & Terminal Tweaks..."
 
-# Create parent configuration target directories
-mkdir -p "$HOME/.config/nvim"
-mkdir -p "$HOME/.config/ghostty"
+mkdir -p "$HOME/.config"
 
 link_config() {
     local source_path="$1"
@@ -101,15 +105,15 @@ link_config() {
         echo "⏭️  [SKIP] Link already correct: $target_path"
     else
         echo "🔗 Linking $target_path -> $source_path"
-        rm -rf "$target_path" # Erase broken items or unexpected folders
+        rm -rf "$target_path"
         ln -sf "$source_path" "$target_path"
     fi
 }
 
-# NEVIM: Links the entire configuration folder layout
+# NEVIM: Maps your configuration directory cleanly
 link_config "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
 
-# GHOSTTY: Direct file link mapping config.ghostty to the required target filename 'config'
+# GHOSTTY: Explicitly maps config target
 link_config "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/.config/ghostty/config"
 
 # Force Ghostty to use Zsh directly inside its config asset
@@ -135,7 +139,46 @@ EOF
 fi
 
 # ---------------------------------------------------------------------
-# 5. Install Go via GVM (Forced Binary Mode Fix)
+# 5. Install NVM, Node LTS, & Claude Code
+# ---------------------------------------------------------------------
+status_echo "Checking Node.js Environment (NVM) & CLIs..."
+
+mkdir -p "$HOME/.nvm"
+export NVM_DIR="$HOME/.nvm"
+
+if [ ! -f "$NVM_DIR/nvm.sh" ]; then
+    echo "🟢 Installing NVM..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+fi
+
+# Explicitly guarantee NVM loader block exists inside your final .zshrc config
+if ! grep -q "NVM_DIR" "$HOME/.zshrc" 2>/dev/null; then
+    echo "📝 Injecting NVM initialization pathways to ~/.zshrc..."
+    cat <<'EOF' >> "$HOME/.zshrc"
+
+# Node Version Manager (NVM) Loader
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+EOF
+fi
+
+# Securely source NVM into the current script loop context
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+echo "🟢 Ensuring Node.js LTS is configured..."
+nvm install --lts
+nvm use --lts --default
+
+if ! command -v claude &> /dev/null; then
+    echo "🤖 Installing official Claude Code CLI tool globally..."
+    npm install -g @anthropic-ai/claude-code
+else
+    echo "⏭️  [SKIP] Claude Code is already installed."
+fi
+
+# ---------------------------------------------------------------------
+# 6. Install Go via GVM (Forced Binary Mode Fix)
 # ---------------------------------------------------------------------
 status_echo "Checking GVM & Go..."
 if [ ! -d "$HOME/.gvm" ]; then
@@ -157,7 +200,7 @@ else
 fi
 
 # ---------------------------------------------------------------------
-# 6. Install Erlang/Elixir via asdf
+# 7. Install Erlang/Elixir via asdf
 # ---------------------------------------------------------------------
 status_echo "Checking asdf & Languages..."
 if [ ! -d "$HOME/.asdf" ]; then
@@ -189,7 +232,7 @@ else
 fi
 
 # ---------------------------------------------------------------------
-# 7. Interactive GitHub SSH Key Setup
+# 8. Interactive GitHub SSH Key Setup
 # ---------------------------------------------------------------------
 status_echo "Checking GitHub SSH Setup..."
 SSH_KEY="$HOME/.ssh/id_ed25519"
@@ -230,4 +273,4 @@ EOT
     fi
 fi
 
-status_echo "🎉 Complete! Your dev environment is up-to-date, fonts registered, and fully configured."
+status_echo "🎉 Complete! Environment ready, tmux & VSCodium installed, Claude Code configured."

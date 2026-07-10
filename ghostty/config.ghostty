@@ -4,15 +4,21 @@ font-style = medium
 
 theme = Ciapre
 
+background-opacity=0.97
+
 cursor-style = block
 cursor-style-blink = false
+
+# Logitech hi-res wheel on Wayland emits tiny "precision" scroll deltas that
+# round down to zero rows with the default precision:1. Boost it so each notch moves.
+mouse-scroll-multiplier = precision:3,discrete:3
 
 window-padding-x = 10
 window-padding-y = 4
 
 command = /bin/zsh
 
-keybind = shift+tab=toggle_fullscreen
+keybind = shift+tab=toggle_maximize
 keybind = ctrl+t=new_tab
 
 
