@@ -102,7 +102,7 @@ Custom two-line zsh prompt (no theme). First line shows `path:branch` with dirty
 
 ## Tmux theme
 
-Everforest-inspired dark theme. Session name with green accent (`#83C092`), window separators with `·`, active window highlighted with green background. Pane borders show active/inactive labels with command name. Status-right displays pi session info (model, thinking, context, tokens, cost) via `tmux-pi-status.sh`. Tmux hooks auto-reset notification highlights when switching windows/sessions.
+Gruvbox Dark theme (matches Ghostty). Session name with orange accent (`#FE8019`) on a dark bar (`#3C3836`), window separators with `·`, active window highlighted with orange background. Pane borders: active border orange, active pane label on green (`#98971A`). Pane borders show active/inactive labels with command name. Status-right displays pi session info (model, thinking, context, tokens, cost) via `tmux-pi-status.sh`. Tmux hooks auto-reset notification highlights when switching windows/sessions.
 
 ## Neovim config
 

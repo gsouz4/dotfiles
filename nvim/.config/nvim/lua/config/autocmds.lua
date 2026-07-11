@@ -32,6 +32,23 @@ vim.api.nvim_create_autocmd('ColorScheme', {
   end,
 })
 
+-- Auto-open Neo-tree as a sidebar when Neovim is launched on a directory
+-- e.g. `nvim .` or `nvim ~/project` shows the file explorer automatically.
+-- Opens an empty main buffer plus the sidebar (two windows) so the auto-quit
+-- autocmd below never fires during startup.
+vim.api.nvim_create_autocmd('VimEnter', {
+  desc = 'Open Neo-tree when starting on a directory',
+  group = vim.api.nvim_create_augroup('neotree-auto-open', { clear = true }),
+  callback = function()
+    local arg = vim.fn.argv(0)
+    if type(arg) == 'string' and arg ~= '' and vim.fn.isdirectory(arg) == 1 then
+      vim.cmd.cd(vim.fn.fnameescape(arg))
+      vim.cmd.enew() -- replace the directory buffer with an empty main window
+      vim.cmd 'Neotree show' -- open sidebar without stealing focus
+    end
+  end,
+})
+
 -- Auto-quit Neo-tree when it's the last window open
 -- Prevents Neovim from staying open with only Neo-tree visible
 vim.api.nvim_create_autocmd('BufEnter', {

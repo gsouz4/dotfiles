@@ -33,7 +33,7 @@ fi
 
 echo "📦 Ensuring core tools, tmux, and open-source code are installed..."
 sudo apt install -y \
-    git zsh neovim tmux vscodium curl build-essential unzip fzf ripgrep bison \
+    git zsh tmux vscodium curl build-essential unzip fzf ripgrep bison \
     libssl-dev ncurses-dev libncurses5-dev autoconf m4 \
     libwxgtk3.2-dev libgl1-mesa-dev libglu1-mesa-dev libpng-dev \
     libssh-dev unixodbc-dev fontconfig
@@ -110,8 +110,11 @@ link_config() {
     fi
 }
 
-# NEVIM: Maps your configuration directory cleanly
-link_config "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
+# NEOVIM: Point at the real config dir inside the stow package
+link_config "$DOTFILES_DIR/nvim/.config/nvim" "$HOME/.config/nvim"
+
+# TMUX: Link the tmux config into the home directory
+link_config "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 
 # GHOSTTY: Explicitly maps config target
 link_config "$DOTFILES_DIR/ghostty/config.ghostty" "$HOME/.config/ghostty/config"
@@ -232,7 +235,39 @@ else
 fi
 
 # ---------------------------------------------------------------------
-# 8. Interactive GitHub SSH Key Setup
+# 8. Install mise (version manager) + Neovim nightly + tree-sitter CLI
+# ---------------------------------------------------------------------
+# nvim-treesitter's `main` branch requires Neovim >= 0.12 (nightly) and the
+# tree-sitter CLI (>= 0.26.1), neither of which apt provides. mise manages both;
+# versions are tracked in tool-versions/.tool-versions.
+status_echo "Checking mise & managed tools (Neovim nightly, tree-sitter)..."
+
+if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
+    echo "🔧 Installing mise..."
+    curl -fsSL https://mise.run | sh
+fi
+export PATH="$HOME/.local/bin:$PATH"
+
+# Activate mise in the shell (guarded, matches the NVM/GVM injection style)
+if ! grep -q "mise activate" "$HOME/.zshrc" 2>/dev/null; then
+    echo "📝 Injecting mise activation into ~/.zshrc..."
+    cat <<'EOF' >> "$HOME/.zshrc"
+
+# mise version manager
+eval "$(mise activate zsh)"
+EOF
+fi
+
+# Point ~/.tool-versions at the tracked file so mise picks up global versions
+link_config "$DOTFILES_DIR/tool-versions/.tool-versions" "$HOME/.tool-versions"
+
+# Install only the tools this section owns. Other entries in ~/.tool-versions
+# (ruby, erlang, elixir, …) stay with asdf/gvm/nvm during the mise migration.
+echo "📥 Installing Neovim nightly & tree-sitter via mise..."
+mise install -y neovim tree-sitter
+
+# ---------------------------------------------------------------------
+# 9. Interactive GitHub SSH Key Setup
 # ---------------------------------------------------------------------
 status_echo "Checking GitHub SSH Setup..."
 SSH_KEY="$HOME/.ssh/id_ed25519"
