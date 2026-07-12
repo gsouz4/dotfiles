@@ -41,25 +41,14 @@ vim.keymap.set('n', '<leader>k', '<cmd>Neotree reveal<CR>', { desc = 'Reveal in 
 -- Theme and UI
 -- ===================================================================
 
--- Toggle between dark and light theme
+-- Toggle between dark and light for the ACTIVE theme (not hardcoded to one).
+-- Reapplies the current colorscheme after flipping 'background' so themes that
+-- map light/dark variants (e.g. catppuccin latte <-> mocha) switch accordingly.
 vim.keymap.set('n', '<leader>tt', function()
-  vim.cmd [[hi clear]]
-
-  if vim.o.background == 'dark' then
-    vim.o.background = 'light'
-    vim.cmd 'colorscheme everforest'
-  else
-    vim.o.background = 'dark'
-    vim.cmd 'colorscheme everforest'
-  end
+  vim.o.background = (vim.o.background == 'dark') and 'light' or 'dark'
+  local current = vim.g.colors_name or 'catppuccin'
+  vim.cmd.colorscheme(current)
 end, { desc = 'Toggle [T]heme [D]ark/Light' })
-
--- ===================================================================
--- Markdown Tools
--- ===================================================================
-
--- Start Markdown preview
-vim.keymap.set('n', '<leader>mp', '<cmd>MarkdownPreview<CR>', { desc = '[M]arkdown [P]review', silent = true })
 
 -- ===================================================================
 -- Utility Keymaps

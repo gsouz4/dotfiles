@@ -254,6 +254,9 @@ if ! grep -q "mise activate" "$HOME/.zshrc" 2>/dev/null; then
     cat <<'EOF' >> "$HOME/.zshrc"
 
 # mise version manager
+# Ensure ~/.local/bin (where mise installs itself) is on PATH before activating,
+# otherwise `mise activate` fails with "command not found: mise".
+export PATH="$HOME/.local/bin:$PATH"
 eval "$(mise activate zsh)"
 EOF
 fi
@@ -265,6 +268,42 @@ link_config "$DOTFILES_DIR/tool-versions/.tool-versions" "$HOME/.tool-versions"
 # (ruby, erlang, elixir, …) stay with asdf/gvm/nvm during the mise migration.
 echo "📥 Installing Neovim nightly & tree-sitter via mise..."
 mise install -y neovim tree-sitter
+
+# ---------------------------------------------------------------------
+# Remove any system Neovim whose version differs from the mise-managed one.
+# ---------------------------------------------------------------------
+# A stale nvim (apt 0.11.x, a manual /usr/local/bin build, a snap, ...) shadows
+# the mise nightly on PATH and breaks the nvim-treesitter `main` config, which
+# needs >= 0.12. We take the mise nvim as the source of truth: any other nvim on
+# the system with a different --version is removed so `nvim` resolves to mise's.
+MISE_NVIM="$(mise which nvim 2>/dev/null || true)"
+MISE_NVIM_VER=""
+if [ -x "$MISE_NVIM" ]; then
+    MISE_NVIM_VER="$("$MISE_NVIM" --version 2>/dev/null | head -1)"
+fi
+
+if [ -n "$MISE_NVIM_VER" ]; then
+    for candidate in /usr/bin/nvim /usr/local/bin/nvim /bin/nvim /snap/bin/nvim; do
+        [ -x "$candidate" ] || continue          # not present
+        [ "$candidate" = "$MISE_NVIM" ] && continue  # this IS the mise binary
+
+        candidate_ver="$("$candidate" --version 2>/dev/null | head -1)"
+        [ "$candidate_ver" = "$MISE_NVIM_VER" ] && continue  # same version, keep it
+
+        echo "🧹 Removing $candidate ($candidate_ver) — differs from mise ($MISE_NVIM_VER)"
+        if dpkg -S "$candidate" >/dev/null 2>&1; then
+            # apt-owned: remove the package cleanly
+            sudo apt remove -y neovim
+        else
+            # manual install / snap symlink: drop the binary
+            sudo rm -f "$candidate"
+        fi
+    done
+    hash -r 2>/dev/null || true
+    echo "🔎 Neovim now resolves to: $("$MISE_NVIM" --version | head -1)"
+else
+    echo "⚠️  mise could not resolve nvim; skipping system-Neovim cleanup."
+fi
 
 # ---------------------------------------------------------------------
 # 9. Interactive GitHub SSH Key Setup
