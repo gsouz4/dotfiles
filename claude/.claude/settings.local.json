@@ -1,12 +1,46 @@
 {
+  "model": "opus",
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "type": "command",
+    "command": "python3 ~/.claude/statusline.py",
+    "refreshInterval": 2
+  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "bedrock@claude-bedrock": true
+  },
+  "extraKnownMarketplaces": {
+    "superpowers-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "obra/superpowers-marketplace"
+      }
+    },
+    "claude-bedrock": {
+      "source": {
+        "source": "github",
+        "repo": "iurykrieger/claude-bedrock"
+      }
+    }
   },
   "permissions": {
     "allow": [
       "Bash(qmd update:*)",
       "Bash(qmd embed:*)",
-      "Bash(fswatch -1 /tmp/devtui-content)"
+      "Bash(fswatch -1 /tmp/devtui-content)",
+      "Bash(git -C ~/Documents/me log --oneline -5)",
+      "Bash(git -C ~/Documents/me status)",
+      "Bash(mkdir -p src/data)",
+      "Bash(herdr --default-config)",
+      "Bash(sed -n '/^\\\\[keys\\\\]/,/^\\\\[/p' default-config.toml)",
+      "Bash(stow -n -v -t ~ herdr)",
+      "Bash(stow -t ~ herdr)"
     ]
   }
 }

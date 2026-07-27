@@ -1,0 +1,22 @@
+onboarding = false
+# herdr — terminal workspace manager for AI coding agents
+# Full reference: herdr --default-config  |  https://herdr.dev/docs/configuration/
+# Reload after editing: herdr server reload-config  (or prefix+shift+r)
+
+[keys]
+# Matches the tmux prefix in ~/.tmux.conf (set -g prefix C-Space) so muscle
+# memory carries over. Avoid shift+letter prefixes: terminals send a bare
+# uppercase char, so herdr would swallow every capital letter you type.
+prefix = "ctrl+space"
+
+# Sounds only fire for agents in *background* workspaces. There is no switch
+# that mutes needs-attention while keeping done, so this disables both and
+# relies on the in-app toast below for a visual cue instead.
+[ui.sound]
+enabled = false
+
+[ui.toast]
+delivery = "herdr"
+
+[ui.toast.herdr]
+position = "bottom-right"

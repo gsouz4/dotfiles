@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 .DEFAULT_GOAL: help
 
-PACKAGES = zsh git tmux tool-versions nvim claude direnv ssh local-bin ghostty pi tig opencode
+PACKAGES = zsh git tmux tool-versions nvim claude direnv ssh local-bin ghostty pi tig opencode herdr
 
 help: ## Show all available commands
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make \033[36m<target>\033[0m\n"} /^[.a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
@@ -10,7 +10,7 @@ help: ## Show all available commands
 
 install: ## Install dotfiles (first time setup)
 	@command -v stow >/dev/null || (echo "Installing GNU Stow..." && brew install stow)
-	@mkdir -p ~/.config/nvim ~/.config/direnv ~/.config/ghostty ~/.ssh/config.d ~/.secrets ~/.pi/agent
+	@mkdir -p ~/.config/nvim ~/.config/direnv ~/.config/ghostty ~/.config/herdr ~/.ssh/config.d ~/.secrets ~/.pi/agent
 	@for pkg in $(PACKAGES); do echo "Stowing $$pkg..."; stow -t ~ $$pkg; done
 	@$(MAKE) sync-claude
 	@echo "Done. Run 'source ~/.zshrc' to reload."

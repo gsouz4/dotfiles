@@ -42,7 +42,7 @@ Leader is `;` (semicolon).
 
 | Key | Action |
 |-----|--------|
-| `Ctrl-p` / `;sf` | Find files (frecency) |
+| `Ctrl-p` / `;sf` / `<Space>ff` / `<Space>pp` | Find files (frecency) |
 | `Ctrl-f` / `;sg` | Live grep |
 | `Ctrl-i` / `;s.` | Recent files |
 | `;;` | Open buffers |
