@@ -6,3 +6,5 @@ erlang 28.3.2
 elixir 1.19.5-otp-28
 neovim nightly
 tree-sitter latest
+go:golang.org/x/tools/gopls latest
+stylua 2.5.2

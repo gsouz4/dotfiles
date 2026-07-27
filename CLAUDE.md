@@ -27,6 +27,7 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 - `~/.claude/settings.json` is machine-specific (permissions), not tracked. Portable keys synced from local via `make sync-claude`
 - `~/.claude/settings.local.json` is portable (hooks, plugins, statusline), tracked via stow. Source of truth for portable config
 - mise is the version manager (replacing asdf). Both coexist during migration. `.tool-versions` is the shared config file
+- CLI tooling that a plugin expects but does not ship (e.g. `gopls`) is declared in `.tool-versions` via a mise backend, never installed into a language toolchain's own bin dir
 - SSH host entries live in `~/.ssh/config.d/`, not tracked
 - nvim CI workflow lives at repo root `.github/workflows/ci.yml` with path filter
 - Never use `git add -A`. Always stage files explicitly
@@ -59,6 +60,17 @@ Lives in `claude/.claude/`. Stowed to `~/.claude/`.
 `/vault`, `/note`, `/recap`, `/skill-creator`, `/qa`, `/browser`
 
 `~/.claude/skills` is a directory-level symlink to `claude/.claude/skills/`. New skills appear automatically without restow.
+
+### LSP
+
+`gopls-lsp@claude-plugins-official` is enabled in `settings.local.json`, so it follows the repo to every machine. The plugin is only a wrapper — it ships no binary. If `gopls` is not on PATH, every LSP call (`goToDefinition`, `findReferences`, `hover`, …) fails with `ENOENT: gopls`.
+
+gopls is installed via mise's `go:` backend, tracked as `go:golang.org/x/tools/gopls latest` in `.tool-versions`. Two traps, both already handled in `setup.sh`:
+
+- Do **not** switch to a bare `go install`. Sourcing gvm leaves `GOBIN=$GOROOT/bin` set, so the binary also lands in the Go toolchain's own bin dir, shadows the mise copy, and is wiped on the next Go upgrade. The install runs under `env -u GOBIN -u GOPATH`.
+- `mise activate` rewrites PATH only at shell start, so a newly installed tool is invisible to processes already running and to anything that never sourced a shell. `~/.local/share/mise/shims` is appended to PATH (activate keeps priority) so external consumers resolve it.
+
+After installing gopls, **restart Claude Code** — it captures PATH at launch. `make deps` checks for `gopls`.
 
 ## Pi config
 
@@ -124,6 +136,12 @@ Lives in `nvim/.config/nvim/`. Stowed to `~/.config/nvim/`. Full reference in [`
 
 - `rust_analyzer` - cargo check on save, proc macros, inlay hints
 - `lua_ls` - Neovim Lua development with LazyDev
+- `gopls` - staticcheck, gofumpt, unusedparams/shadow analyses, inlay hints
+- `golangci_lint_ls` - Go diagnostics only (installed via Mason UI, auto-enabled)
+
+Servers are registered with `vim.lsp.config()` and enabled by `mason-lspconfig`'s `automatic_enable`. mason-lspconfig v2 removed the `handlers` option — do not reintroduce it, it is silently ignored and the whole `servers` table stops taking effect.
+
+`gopls` is the exception: it comes from mise, not Mason, so `automatic_enable` never sees it and `lsp.lua` calls `vim.lsp.enable 'gopls'` explicitly. It is filtered out of `ensure_installed` so Mason does not install a competing copy.
 
 ### Formatters (conform)
 

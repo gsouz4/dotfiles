@@ -164,8 +164,36 @@ return {
           },
         },
 
+        -- Go Language Server
+        -- Binary comes from mise (`go:golang.org/x/tools/gopls` in
+        -- .tool-versions), not Mason -- see the enable block below.
+        gopls = {
+          settings = {
+            gopls = {
+              -- Report unused parameters and shadowed variables
+              analyses = {
+                unusedparams = true,
+                shadow = true,
+              },
+
+              -- Run staticcheck alongside the default vet analysers
+              staticcheck = true,
+
+              -- Stricter gofmt (matches the gofumpt formatter in conform)
+              gofumpt = true,
+
+              -- Inlay hints, mirroring the rust_analyzer setup above
+              hints = {
+                parameterNames = true,
+                assignVariableTypes = true,
+                compositeLiteralTypes = true,
+                functionTypeParameters = true,
+              },
+            },
+          },
+        },
+
         -- Add more servers as needed:
-        -- Go: gopls = {}
         -- Python: pyright = {} or pylsp = {}
         -- JavaScript/TypeScript: ts_ls = {}
         -- C/C++: clangd = {}
@@ -175,9 +203,14 @@ return {
       -- ===================================================================
       -- Mason Tool Installation
       -- ===================================================================
-      -- Automatically install language servers and related tools
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
+      -- Automatically install language servers and related tools.
+      -- gopls is excluded: it is managed by mise via .tool-versions, and letting
+      -- Mason install a second copy would leave two binaries racing on PATH.
+      local mason_managed = vim.tbl_filter(function(name)
+        return name ~= 'gopls'
+      end, vim.tbl_keys(servers or {}))
+
+      local ensure_installed = vim.list_extend(mason_managed, {
         'stylua', -- Lua formatter
         -- Add other tools as needed:
         -- 'prettier', 'eslint_d', 'black', 'isort', etc.
@@ -190,24 +223,37 @@ return {
       -- ===================================================================
       -- LSP Server Setup
       -- ===================================================================
+      -- mason-lspconfig v2 removed the `handlers` and `automatic_installation`
+      -- options. They were silently ignored here, which meant none of the
+      -- settings in the `servers` table above ever reached a language server --
+      -- rust_analyzer and lua_ls were running on stock defaults.
+      --
+      -- The replacement is the built-in vim.lsp.config registry (nvim 0.11+):
+      -- register settings per server, then enable the server.
+      for name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(name, server)
+      end
+
       require('mason-lspconfig').setup {
-        -- Don't auto-install here (use mason-tool-installer instead)
+        -- Installation is mason-tool-installer's job (see above)
         ensure_installed = {},
-        automatic_installation = false,
 
-        -- Handler for each language server
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-
-            -- Merge server-specific capabilities with defaults
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-
-            -- Setup the language server
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+        -- Enable anything Mason installed: lua_ls, rust_analyzer, and
+        -- golangci_lint_ls (Go diagnostics, installed via the Mason UI)
+        automatic_enable = true,
       }
+
+      -- gopls comes from mise rather than Mason, so `automatic_enable` never
+      -- sees it and nothing would start it. Without this, the only client
+      -- attaching to a Go buffer is golangci_lint_ls -- a diagnostics-only
+      -- server -- and `gd`/`gr`/`K` fail with "method textDocument/definition
+      -- is not supported by any server activated for this buffer".
+      if vim.fn.executable 'gopls' == 1 then
+        vim.lsp.enable 'gopls'
+      else
+        vim.notify('gopls not found on PATH; Go LSP disabled. Run: mise install', vim.log.levels.WARN)
+      end
 
       -- ===================================================================
       -- Module Exports for Testing

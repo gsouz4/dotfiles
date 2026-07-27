@@ -51,4 +51,16 @@ alias pi="$HOME/.local/share/mise/installs/node/23.9.0/bin/pi"
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
 
-[[ -s "/home/gsouza/.gvm/scripts/gvm" ]] && source "/home/gsouza/.gvm/scripts/gvm"
+# mise version manager
+export PATH="$HOME/.local/bin:$PATH"
+eval "$(mise activate zsh)"
+
+# mise shims, appended so `mise activate` keeps priority and these only resolve
+# what it missed. Needed because activate rewrites PATH once, when a shell
+# starts: a tool installed later is invisible to any process already running,
+# and to anything that never sourced a shell at all. Claude Code's gopls-lsp
+# plugin spawns `gopls` directly and hits exactly that — the shim directory is a
+# stable path that always resolves to the current version.
+export PATH="$PATH:$HOME/.local/share/mise/shims"
+
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"

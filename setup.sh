@@ -235,12 +235,12 @@ else
 fi
 
 # ---------------------------------------------------------------------
-# 8. Install mise (version manager) + Neovim nightly + tree-sitter CLI
+# 8. Install mise (version manager) + Neovim nightly + tree-sitter CLI + gopls
 # ---------------------------------------------------------------------
 # nvim-treesitter's `main` branch requires Neovim >= 0.12 (nightly) and the
 # tree-sitter CLI (>= 0.26.1), neither of which apt provides. mise manages both;
 # versions are tracked in tool-versions/.tool-versions.
-status_echo "Checking mise & managed tools (Neovim nightly, tree-sitter)..."
+status_echo "Checking mise & managed tools (Neovim nightly, tree-sitter, gopls)..."
 
 if ! command -v mise &> /dev/null && [ ! -x "$HOME/.local/bin/mise" ]; then
     echo "🔧 Installing mise..."
@@ -261,6 +261,23 @@ eval "$(mise activate zsh)"
 EOF
 fi
 
+# Separate guard from the block above: machines set up before gopls was added
+# already match "mise activate" and would otherwise never get the shims line.
+#
+# `mise activate` rewrites PATH once, when a shell starts. Anything installed
+# afterwards is invisible to processes already running, and to consumers that
+# never source a shell — Claude Code's gopls-lsp plugin spawns `gopls` directly
+# and fails with `ENOENT: gopls`. The shim directory is a stable path that always
+# resolves the current version. Appended, so activate keeps priority.
+if ! grep -q "mise/shims" "$HOME/.zshrc" 2>/dev/null; then
+    echo "📝 Injecting mise shims into ~/.zshrc PATH..."
+    cat <<'EOF' >> "$HOME/.zshrc"
+
+# mise shims — resolvable by editors, LSP plugins, and long-lived processes
+export PATH="$PATH:$HOME/.local/share/mise/shims"
+EOF
+fi
+
 # Point ~/.tool-versions at the tracked file so mise picks up global versions
 link_config "$DOTFILES_DIR/tool-versions/.tool-versions" "$HOME/.tool-versions"
 
@@ -268,6 +285,25 @@ link_config "$DOTFILES_DIR/tool-versions/.tool-versions" "$HOME/.tool-versions"
 # (ruby, erlang, elixir, …) stay with asdf/gvm/nvm during the mise migration.
 echo "📥 Installing Neovim nightly & tree-sitter via mise..."
 mise install -y neovim tree-sitter
+
+# gopls — the Go language server. Required by the Claude Code `gopls-lsp` plugin,
+# which is enabled for every machine via claude/.claude/settings.local.json but
+# ships no binary of its own: without gopls on PATH every LSP call fails with
+# `ENOENT: gopls`.
+#
+# Installed through mise's `go:` backend rather than a bare `go install`, so the
+# binary lives in a versioned mise directory instead of the Go toolchain's own.
+#
+# GOBIN/GOPATH are stripped for this command only. Sourcing gvm (section 6)
+# leaves GOBIN=$GOROOT/bin behind, and the `go install` the go: backend shells
+# out to honours it — writing a second gopls into …/mise/installs/go/<ver>/bin,
+# which shadows the mise copy and is deleted on the next Go upgrade.
+#
+# `golang` comes first because the go: backend needs the Go toolchain to build
+# gopls. Both are idempotent: mise skips anything already installed.
+echo "📥 Installing gopls (Go language server) via mise..."
+env -u GOBIN -u GOPATH mise install -y golang "go:golang.org/x/tools/gopls"
+mise reshim
 
 # ---------------------------------------------------------------------
 # Remove any system Neovim whose version differs from the mise-managed one.

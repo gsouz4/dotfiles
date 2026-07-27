@@ -103,6 +103,16 @@ mise reshim                     # Rebuild shims after installing global npm/gem 
 | `opam` | OCaml package manager and compiler |
 | `erlang` | Erlang VM |
 | `elixir` | Elixir runtime |
+| `neovim` | Editor, nightly (nvim-treesitter `main` needs >= 0.12) |
+| `tree-sitter` | Parser generator CLI (>= 0.26.1) |
+| `go:golang.org/x/tools/gopls` | Go language server, via mise's `go:` backend |
+
+`gopls` is installed through mise rather than `go install` on purpose: `go install` honours `$GOBIN`, which on this machine gvm sets to `$GOROOT/bin` — inside the Go toolchain directory, wiped on the next Go upgrade. Install it with those vars stripped so the binary stays under mise's control:
+
+```bash
+env -u GOBIN -u GOPATH mise install -y golang "go:golang.org/x/tools/gopls"
+mise reshim
+```
 
 #### Legacy: asdf
 
@@ -160,7 +170,7 @@ source ~/.zshrc     # Reload shell
 
 ### 12. Neovim first run
 
-Open `nvim`. Lazy will auto-install plugins. Mason will auto-install LSP servers (lua_ls, rust_analyzer) and debug adapters (delve).
+Open `nvim`. Lazy will auto-install plugins. Mason will auto-install LSP servers (lua_ls, rust_analyzer) and debug adapters (delve). `gopls` is not a Mason package here — it comes from `.tool-versions` via mise, so run `mise install` first or Go files get diagnostics but no navigation.
 
 ## Usage
 
@@ -227,6 +237,16 @@ The `claude` stow package manages hooks, skills, MCP servers, and portable setti
 `~/.claude/skills` is a directory-level symlink. New skills added to `claude/.claude/skills/` appear automatically without restow.
 
 All Claude Code skills also work in pi via shared skill paths (see [Pi > Skill sharing](#skill-sharing)).
+
+### LSP
+
+| Plugin | Binary it needs | Installed by |
+|--------|----------------|--------------|
+| `gopls-lsp@claude-plugins-official` | `gopls` | mise (`.tool-versions`) |
+
+The plugin is enabled in `settings.local.json` and so reaches every machine, but it ships no binary — it just tells Claude Code to spawn `gopls` for `.go` files. Without `gopls` on PATH, every LSP call fails with `ENOENT: gopls`. `make deps` verifies it.
+
+Claude Code reads PATH once, at launch. After installing gopls, **restart Claude Code** or it will keep reporting `ENOENT` against a binary that now exists.
 
 ### MCP servers
 

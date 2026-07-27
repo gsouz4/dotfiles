@@ -50,7 +50,7 @@ return {
           pattern = 'lean',
           callback = function(ev)
             local root = vim.fs.root(ev.buf, { 'lakefile.lean', 'lakefile.toml', 'lean-toolchain' })
-            vim.lsp.start({
+            vim.lsp.start {
               name = 'leanls',
               cmd = { 'lake', 'serve' },
               root_dir = root or vim.fn.getcwd(),
@@ -58,7 +58,7 @@ return {
               capabilities = cfg.capabilities,
               init_options = cfg.init_options,
               on_init = cfg.on_init,
-            })
+            }
           end,
         })
       end

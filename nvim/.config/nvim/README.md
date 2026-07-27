@@ -114,6 +114,13 @@ Managed by Mason. Auto-installed:
 
 - **rust_analyzer** - Clippy on save, all cargo features, proc macros, inlay hints
 - **lua_ls** - Neovim Lua with LazyDev integration
+- **golangci_lint_ls** - Go diagnostics only, no navigation
+
+Not from Mason:
+
+- **gopls** - staticcheck, gofumpt, unusedparams/shadow analyses, inlay hints. The binary is managed by mise (`.tool-versions`), so Mason's `automatic_enable` never sees it and `lsp.lua` enables it explicitly.
+
+Servers are registered via `vim.lsp.config()`. mason-lspconfig v2 dropped the `handlers` option — if it comes back, it is ignored silently and every per-server setting stops applying.
 
 ## Formatters
 
@@ -167,13 +174,14 @@ Everforest with medium contrast. Toggle dark/light with `;tt`.
 Edit `lua/plugins/coding/lsp.lua`, add to the `servers` table:
 
 ```lua
-gopls = {},
 pyright = {},
 ts_ls = {},
 clangd = {},
 ```
 
-Mason auto-installs them on next startup.
+Mason installs them on next startup and `automatic_enable` starts them.
+
+If the binary is managed outside Mason (mise, cargo, a system package), also filter it out of `ensure_installed` and call `vim.lsp.enable '<name>'` yourself — see how `gopls` is handled.
 
 ### Add a formatter
 

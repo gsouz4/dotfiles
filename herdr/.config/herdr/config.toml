@@ -20,3 +20,6 @@ delivery = "herdr"
 
 [ui.toast.herdr]
 position = "bottom-right"
+
+[ui]
+agent_panel_sort = "priority"
