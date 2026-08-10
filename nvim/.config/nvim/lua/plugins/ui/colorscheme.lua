@@ -15,6 +15,8 @@ local themes = {
   { label = 'Catppuccin Latte (light)', scheme = 'catppuccin-latte', background = 'light' },
   { label = 'Everforest (dark)', scheme = 'everforest', background = 'dark' },
   { label = 'Everforest (light)', scheme = 'everforest', background = 'light' },
+  { label = 'Crimson Moonlight (dark)', scheme = 'crimson_moonlight', background = 'dark' },
+  { label = 'Radioactive Waste (dark)', scheme = 'radioactive_waste', background = 'dark' },
 }
 
 local function apply_theme(theme)
@@ -68,8 +70,8 @@ return {
       }
 
       -- Apply as the default colorscheme.
-      vim.o.background = 'dark'
-      vim.cmd.colorscheme 'catppuccin-frappe'
+      -- vim.o.background = 'dark'
+      -- vim.cmd.colorscheme 'catppuccin-frappe'
 
       -- Expose the switcher via a command and a keymap.
       vim.api.nvim_create_user_command('ColorschemePick', SwitchColorscheme, { desc = 'Pick a colorscheme' })
@@ -100,6 +102,14 @@ return {
       }
       -- Note: intentionally does NOT call vim.cmd.colorscheme here so that
       -- Catppuccin remains the default. Select Everforest via the picker.
+    end,
+  },
+
+  {
+    'rockerBOO/boo-colorscheme-nvim',
+    config = function()
+      vim.o.background = 'dark'
+      vim.cmd.colorscheme 'catppuccin-frappe'
     end,
   },
 }

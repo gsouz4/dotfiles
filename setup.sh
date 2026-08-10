@@ -342,7 +342,64 @@ else
 fi
 
 # ---------------------------------------------------------------------
-# 9. Interactive GitHub SSH Key Setup
+# 9. Install Docker Engine & Docker Compose
+# ---------------------------------------------------------------------
+# Installed from Docker's own APT repository, not Ubuntu's `docker.io` package:
+# the distro build lags behind and does not ship the Compose v2 plugin, so
+# `docker compose` (subcommand, not the old `docker-compose` script) is missing.
+status_echo "Checking Docker Engine & Compose..."
+
+if ! command -v docker &> /dev/null; then
+    echo "🐳 Adding Docker's official APT repository..."
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    # UBUNTU_CODENAME is empty on Ubuntu derivatives (Pop!_OS, Mint), where
+    # VERSION_CODENAME holds the upstream name Docker's pool is keyed on.
+    DOCKER_CODENAME="$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")"
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $DOCKER_CODENAME stable" \
+        | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt update
+
+    echo "📦 Installing Docker Engine, CLI, Buildx & Compose plugins..."
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    hash -r 2>/dev/null || true
+else
+    echo "⏭️  [SKIP] Docker is already installed."
+fi
+
+# Separate guard: machines that installed Docker some other way (docker.io,
+# convenience script) have the binary but not necessarily the Compose plugin.
+if ! docker compose version &> /dev/null; then
+    echo "📦 Installing Docker Compose plugin..."
+    sudo apt install -y docker-compose-plugin
+else
+    echo "⏭️  [SKIP] Docker Compose plugin is already installed."
+fi
+
+# Run the daemon at boot. Guarded because containers (and WSL without systemd)
+# have no init system to talk to.
+if command -v systemctl &> /dev/null; then
+    if ! systemctl is-enabled docker &> /dev/null; then
+        echo "⚙️  Enabling the Docker service..."
+        sudo systemctl enable --now docker
+    else
+        echo "⏭️  [SKIP] Docker service is already enabled."
+    fi
+fi
+
+# Membership in the `docker` group is what allows non-root use of the socket.
+if ! id -nG "$USER" | grep -qw docker; then
+    echo "👤 Adding $USER to the docker group..."
+    sudo usermod -aG docker "$USER"
+    echo "⚠️  Log out and back in (or run 'newgrp docker') before using docker without sudo."
+else
+    echo "⏭️  [SKIP] $USER is already in the docker group."
+fi
+
+# ---------------------------------------------------------------------
+# 10. Interactive GitHub SSH Key Setup
 # ---------------------------------------------------------------------
 status_echo "Checking GitHub SSH Setup..."
 SSH_KEY="$HOME/.ssh/id_ed25519"

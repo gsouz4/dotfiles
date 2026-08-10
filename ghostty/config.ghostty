@@ -1,5 +1,5 @@
 font-family = ZedMono Nerd Font Propo
-font-size = 13.5
+font-size = 14
 font-style = medium
 
 theme = Ciapre
@@ -15,6 +15,7 @@ mouse-scroll-multiplier = precision:3,discrete:3
 
 window-padding-x = 10
 window-padding-y = 4
+window-decoration = none
 
 command = /bin/zsh
 

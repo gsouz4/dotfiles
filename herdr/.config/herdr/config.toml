@@ -3,6 +3,12 @@ onboarding = false
 # Full reference: herdr --default-config  |  https://herdr.dev/docs/configuration/
 # Reload after editing: herdr server reload-config  (or prefix+shift+r)
 
+[theme]
+# name = "catppuccin"
+name = "rose pine"
+# name = "gruvbox"
+
+
 [keys]
 # Matches the tmux prefix in ~/.tmux.conf (set -g prefix C-Space) so muscle
 # memory carries over. Avoid shift+letter prefixes: terminals send a bare
