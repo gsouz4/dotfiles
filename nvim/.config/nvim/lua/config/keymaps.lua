@@ -61,6 +61,9 @@ vim.keymap.set('n', '<leader>cz', ':let @+ = expand("%:p")<CR>', {
   silent = true,
 })
 
+-- New empty buffer in current window
+vim.keymap.set('n', '<leader>vn', '<cmd>enew<CR>', { desc = '[V]new empty buffer', silent = true })
+
 -- ===================================================================
 -- Function to Setup Plugin-Specific Keymaps
 -- ===================================================================

@@ -65,6 +65,9 @@ return {
       -- TOML
       toml = { 'taplo' },
 
+      -- XML
+      xml = { 'xmllint' },
+
       -- Add more formatters as needed for your languages
       -- See: https://github.com/stevearc/conform.nvim#formatters
     },

@@ -5,10 +5,11 @@ onboarding = false
 
 [theme]
 # name = "catppuccin"
-name = "rose pine"
+name = "gruvbox"
 # name = "gruvbox"
 
 
+auto_switch = false
 [keys]
 # Matches the tmux prefix in ~/.tmux.conf (set -g prefix C-Space) so muscle
 # memory carries over. Avoid shift+letter prefixes: terminals send a bare

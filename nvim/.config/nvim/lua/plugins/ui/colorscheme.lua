@@ -17,6 +17,7 @@ local themes = {
   { label = 'Everforest (light)', scheme = 'everforest', background = 'light' },
   { label = 'Crimson Moonlight (dark)', scheme = 'crimson_moonlight', background = 'dark' },
   { label = 'Radioactive Waste (dark)', scheme = 'radioactive_waste', background = 'dark' },
+  { label = 'Gruvbox (dark)', scheme = 'gruvbox-material', background = 'dark' },
 }
 
 local function apply_theme(theme)
@@ -107,9 +108,16 @@ return {
 
   {
     'rockerBOO/boo-colorscheme-nvim',
+  },
+
+  {
+    'sainnhe/gruvbox-material',
+    priority = 1000,
+    opts = ...,
     config = function()
       vim.o.background = 'dark'
-      vim.cmd.colorscheme 'catppuccin-frappe'
+      vim.g.gruvbox_material_enable_italic = true
+      vim.cmd.colorscheme 'gruvbox-material'
     end,
   },
 }
