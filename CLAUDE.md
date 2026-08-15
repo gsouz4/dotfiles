@@ -131,6 +131,7 @@ Lives in `nvim/.config/nvim/`. Stowed to `~/.config/nvim/`. Full reference in [`
 - `;gb` / `;gc` / `;gs` - git branches/commits/status
 - `;f` - format buffer
 - `;b` - toggle breakpoint, `F5` - start/continue debug
+- `;db` - toggle database UI (nvim-dbee)
 
 ### LSP servers
 
@@ -146,6 +147,15 @@ Servers are registered with `vim.lsp.config()` and enabled by `mason-lspconfig`'
 ### Formatters (conform)
 
 stylua (Lua), prettier (JS/TS/JSON), black+isort (Python), rustfmt, gofmt, clang-format, shfmt
+
+### Database client
+
+nvim-dbee (`;db`), configured in `plugins/tools/database.lua`. Two things there are deliberate, do not "simplify" them away:
+
+- The Go backend is built from source (`require('dbee').install()` needs `go`, which comes from mise). The prebuilt binary the installer prefers by default is pinned to a 2024 commit, a year behind the plugin's Lua.
+- Upstream has been dormant since 2025-07 and still registers a `BufModifiedSet` autocmd, an event Neovim 0.13 removed. The spec translates it to `OptionSet`/`modified`; without the shim every drawer refresh throws and the UI never opens.
+
+Connections live in `$DBEE_CONNECTIONS` (exported from `~/.secrets/env`) or in `~/.local/state/nvim/dbee/persistence.json`. Never in this repo.
 
 ### CI
 

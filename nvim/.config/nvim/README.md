@@ -27,7 +27,7 @@ lua/
     ui/                     Everforest theme, lualine, which-key, todo-comments
     editor/                 Snacks (fuzzy finder), treesitter, mini.nvim
     coding/                 LSP, completion, formatting
-    tools/                  Copilot, languages, markdown, sleuth
+    tools/                  Copilot, diffview, languages, markdown, sleuth
   kickstart/                Health check, DAP, gitsigns, indent, lint, neo-tree, autopairs
   tests/                    Plenary specs
 tests/run.lua               Test runner
@@ -82,6 +82,9 @@ Leader is `;` (semicolon).
 | `;gb` | Git branches |
 | `;gc` | Git commits |
 | `;gs` | Git status |
+| `;gd` | Diffview - all changes (toggle) |
+| `;gh` | Diffview - current file history |
+| `;gH` | Diffview - repo history |
 | `;hs` | Stage hunk |
 | `;hr` | Reset hunk |
 | `;hp` | Preview hunk |
@@ -107,6 +110,7 @@ Leader is `;` (semicolon).
 | `;mp` | Markdown preview (browser) |
 | `;mg` | Markdown glow (terminal) |
 | `;cz` | Copy file path to clipboard |
+| `;db` | Toggle database UI (see [Database](#database)) |
 
 ## LSP servers
 
@@ -141,6 +145,73 @@ Via conform.nvim. Format on save enabled (toggle with `:FormatToggle`).
 Via nvim-lint. Auto-lint on BufEnter, BufWritePost, InsertLeave.
 
 - Markdown: markdownlint
+
+## Database
+
+nvim-dbee (`;db`). Drawer with connections and scratchpads on the left, SQL editor on the right, paginated result view below. The Go backend speaks the wire protocol directly, so no `psql`/`mysql` client is needed.
+
+| Key | Where | Action |
+|-----|-------|--------|
+| `;db` | anywhere | Toggle the UI |
+| `BB` | editor | Run the whole buffer (or the selection, in visual) |
+| `<CR>` | editor | Run the line under the cursor |
+| `<CR>` / `o` | drawer | Select connection / expand node |
+| `cw` / `dd` | drawer | Edit / delete connection or scratchpad |
+| `L` / `H` | result | Next / previous page (100 rows) |
+| `E` / `F` | result | Last / first page |
+| `yaj` / `yac` | result | Yank row as JSON / CSV (`yaJ` / `yaC` for all rows) |
+
+Connections come from two sources, both outside this repo:
+
+- `$DBEE_CONNECTIONS` — a JSON array, exported from `~/.secrets/env`:
+  ```bash
+  export DBEE_CONNECTIONS='[{"name":"app","type":"postgres","url":"postgres://user:pass@localhost:5432/app"}]'
+  ```
+- `~/.local/state/nvim/dbee/persistence.json` — the saved-connections file, written by the drawer when a connection is added with `add` / `cw`. This is the DBeaver equivalent: add once, it is there forever.
+
+Every field of a connection goes through a Go template before dbee connects, so a saved connection does not have to hold the password:
+
+```json
+[
+  {
+    "id": "local_pg",
+    "name": "local pg",
+    "type": "postgres",
+    "url": "postgres://postgres:{{ exec `pass db/local-pg` }}@localhost:5432/postgres?sslmode=disable"
+  }
+]
+```
+
+`{{ env `VAR` }}` and `{{ exec `command` }}` are the two functions available (`exec` accepts a pipe). Hand-written entries **need the `id` field** — without it the connection is skipped silently, no error. Lines starting with `//` are allowed as comments.
+
+### Migrating from DBeaver
+
+`dbeaver-to-dbee` (in the `local-bin` package) reads DBeaver's `data-sources.json`, decrypts `credentials-config.json`, and prints the equivalent dbee source:
+
+```bash
+dbeaver-to-dbee                                       # find the workspace, print to stdout
+dbeaver-to-dbee --password-command 'pass db/{slug}'   # keep passwords in pass
+dbeaver-to-dbee --with-passwords -o ~/.local/state/nvim/dbee/persistence.json
+```
+
+By default passwords are left out, replaced by `{{ env `DBEE_PW_<NAME>` }}` placeholders. Providers with no dbee adapter are reported and skipped.
+
+### Call log
+
+The panel at the bottom left lists every query run against the selected connection — `<CR>` brings a past result back without re-executing, `<C-c>` cancels one still running.
+
+The backend persists it in two hardcoded paths: `/tmp/dbee-calllog.json` (the list) and `/tmp/dbee-history/<call-id>/` (each result, as gob files). It restores them on startup and rewrites them when Neovim quits, so by default the log grows across sessions and every query sits in `/tmp` in plain text, readable by any user on the machine.
+
+There is no way to clear it from the UI — the call log has exactly two actions and the API has no delete. `database.lua` therefore wipes both paths at startup, before the backend comes up, so the panel only ever shows the current session. Deleting them from a `VimLeavePre` autocmd would not work: the backend writes them again on its way out.
+
+Consequence worth knowing: those paths are shared by every Neovim on the machine, so opening dbee in a second instance drops the first one's archives. Its panel keeps listing the older calls, but `<CR>` can no longer bring their results back.
+
+Two rough edges worth knowing:
+
+- The backend binary is built from source by the `build` step (`require('dbee').install()`), which needs `go` on PATH — it comes from mise. The prebuilt binary the installer prefers is a year older than the plugin's Lua, so the spec forces the source build.
+- `:qa` with the UI open only closes dbee's windows; a second `:qa` quits. Toggle the UI off with `;db` first and one `:qa` is enough.
+
+Upstream has had no commits since 2025-07, so `database.lua` carries a shim for the `BufModifiedSet` event that Neovim 0.13 removed. Without it the drawer throws on every refresh and the UI never opens.
 
 ## Dev commands
 

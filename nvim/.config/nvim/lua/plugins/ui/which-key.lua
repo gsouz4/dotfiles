@@ -71,6 +71,9 @@ return {
       -- Toggle operations (theme, options, etc.)
       { '<leader>t', group = '[T]oggle' },
 
+      -- Git operations (pickers, diffview)
+      { '<leader>g', group = '[G]it' },
+
       -- Git hunk operations (from gitsigns)
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
     },

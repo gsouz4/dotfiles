@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+"""Convert DBeaver connections into an nvim-dbee persistence.json.
+
+DBeaver keeps its connections in `data-sources.json` and the matching
+credentials in `credentials-config.json`, encrypted with a key that ships
+inside the binary (AES-128-CBC, static key, zero IV, 16 junk bytes in front
+of the plaintext). This reads both and prints the equivalent dbee source.
+
+By default no password ends up in the output: each connection gets a
+`{{ env `DBEE_PW_<NAME>` }}` placeholder, which dbee expands when it
+connects. Use --password-command to pull them from a password manager
+instead, or --with-passwords to inline them (plain text, like DBeaver).
+
+Usage:
+  dbeaver-to-dbee                                  # find the workspace, print to stdout
+  dbeaver-to-dbee --workspace ~/some/workspace6
+  dbeaver-to-dbee --password-command 'pass db/{name}'
+  dbeaver-to-dbee --with-passwords -o ~/.local/state/nvim/dbee/persistence.json
+"""
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from urllib.parse import quote
+
+# AES-128-CBC key compiled into DBeaver Community. Zero IV, and the first
+# 16 bytes of the decrypted stream are padding junk that gets dropped.
+DBEAVER_KEY = "babb4a9f774ab853c96c2d653dfe544a"
+DBEAVER_IV = "0" * 32
+
+# Where DBeaver keeps its workspace, per platform and packaging.
+WORKSPACE_GLOBS = [
+    "~/.local/share/DBeaverData/workspace*/*/.dbeaver/data-sources.json",
+    "~/Library/DBeaverData/workspace*/*/.dbeaver/data-sources.json",
+    "~/snap/dbeaver-ce/current/.local/share/DBeaverData/workspace*/*/.dbeaver/data-sources.json",
+    "~/.var/app/io.dbeaver.DBeaverCommunity/data/DBeaverData/workspace*/*/.dbeaver/data-sources.json",
+    "~/AppData/Roaming/DBeaverData/workspace*/*/.dbeaver/data-sources.json",
+]
+
+# DBeaver provider id -> dbee adapter name.
+TYPES = {
+    "postgresql": "postgres",
+    "postgres": "postgres",
+    "redshift": "redshift",
+    "mysql": "mysql",
+    "mariadb": "mysql",
+    "sqlite": "sqlite",
+    "oracle": "oracle",
+    "sqlserver": "sqlserver",
+    "mssql": "sqlserver",
+    "mongodb": "mongo",
+    "mongo": "mongo",
+    "clickhouse": "clickhouse",
+    "duckdb": "duck",
+    "bigquery": "bigquery",
+    "databricks": "databricks",
+}
+
+
+def die(msg):
+    print(f"dbeaver-to-dbee: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+def warn(msg):
+    print(f"dbeaver-to-dbee: {msg}", file=sys.stderr)
+
+
+def find_data_sources(workspace):
+    """Locate data-sources.json, either under an explicit path or the defaults."""
+    if workspace:
+        path = Path(workspace).expanduser()
+        if path.is_file():
+            return [path]
+        found = sorted(path.glob("**/data-sources.json"))
+        if not found:
+            die(f"no data-sources.json under {path}")
+        return found
+
+    found = []
+    for pattern in WORKSPACE_GLOBS:
+        pattern = os.path.expanduser(pattern)
+        root = Path(pattern.split("*")[0])
+        rest = pattern[len(str(root)) :].lstrip("/")
+        if root.exists():
+            found.extend(sorted(root.glob(rest)))
+
+    if not found:
+        die(
+            "no DBeaver workspace found. Pass --workspace with the directory "
+            "that holds data-sources.json (DBeaver shows it under "
+            "Window > Preferences > General > Workspace)"
+        )
+    return found
+
+
+def decrypt_credentials(path):
+    """Decrypt credentials-config.json, or return {} if it cannot be read."""
+    if not path.exists():
+        return {}
+
+    try:
+        raw = subprocess.run(
+            [
+                "openssl", "enc", "-d", "-aes-128-cbc",
+                "-K", DBEAVER_KEY,
+                "-iv", DBEAVER_IV,
+                "-in", str(path),
+            ],
+            capture_output=True,
+            check=True,
+        ).stdout
+    except FileNotFoundError:
+        warn("openssl not found, skipping credentials")
+        return {}
+    except subprocess.CalledProcessError:
+        warn(f"could not decrypt {path.name} (newer DBeaver? master password set?)")
+        return {}
+
+    try:
+        return json.loads(raw[16:].decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        warn(f"decrypted {path.name} but it is not valid json, skipping credentials")
+        return {}
+
+
+def slug(name):
+    return re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_").upper() or "CONN"
+
+
+def build_url(dbee_type, cfg, user, password, encode_password=False):
+    """Render a connection url in the shape dbee's adapter expects."""
+    host = cfg.get("host", "localhost")
+    port = cfg.get("port", "")
+    database = cfg.get("database", "")
+    hostport = f"{host}:{port}" if port else host
+
+    # MySQL takes a go-sql-driver DSN, which is not a url and does no
+    # percent-decoding - anything escaped there would reach the server escaped.
+    if encode_password and dbee_type not in ("mysql", "sqlite", "duck"):
+        password = quote(password, safe="")
+
+    auth = user or ""
+    if auth and password:
+        auth = f"{auth}:{password}"
+
+    if dbee_type in ("postgres", "redshift"):
+        creds = f"{auth}@" if auth else ""
+        return f"postgres://{creds}{hostport}/{database}?sslmode=disable"
+
+    if dbee_type == "mysql":
+        # go-sql-driver DSN, not a url: user:pass@tcp(host:port)/db
+        creds = f"{auth}@" if auth else ""
+        return f"{creds}tcp({hostport})/{database}"
+
+    if dbee_type == "sqlite":
+        # DBeaver stores the file either as a jdbc url or as the database
+        path = cfg.get("url", "").replace("jdbc:sqlite:", "") or database
+        return path
+
+    if dbee_type == "duck":
+        return cfg.get("url", "").replace("jdbc:duckdb:", "") or database
+
+    if dbee_type == "sqlserver":
+        creds = f"{auth}@" if auth else ""
+        return f"sqlserver://{creds}{hostport}?database={database}"
+
+    if dbee_type == "oracle":
+        creds = f"{auth}@" if auth else ""
+        return f"oracle://{creds}{hostport}/{database}"
+
+    if dbee_type == "mongo":
+        creds = f"{auth}@" if auth else ""
+        return f"mongodb://{creds}{hostport}/{database}"
+
+    if dbee_type == "clickhouse":
+        creds = f"{auth}@" if auth else ""
+        return f"clickhouse://{creds}{hostport}/{database}"
+
+    # Anything else: hand back whatever DBeaver had, minus the jdbc prefix
+    return cfg.get("url", "").replace("jdbc:", "")
+
+
+def convert(sources_path, args):
+    data = json.loads(sources_path.read_text())
+    creds = decrypt_credentials(sources_path.parent / "credentials-config.json")
+
+    out = []
+    for conn_id, conn in (data.get("connections") or {}).items():
+        name = conn.get("name", conn_id)
+        provider = conn.get("provider", "")
+        dbee_type = TYPES.get(provider)
+        if not dbee_type:
+            warn(f"skipping {name!r}: no dbee adapter for provider {provider!r}")
+            continue
+
+        cfg = conn.get("configuration") or {}
+        secret = (creds.get(conn_id) or {}).get("#connection") or {}
+        user = secret.get("user") or cfg.get("user") or ""
+        password = secret.get("password") or ""
+
+        if args.with_passwords:
+            rendered = password
+        elif args.password_command:
+            command = args.password_command.format(
+                name=name, slug=slug(name).lower().replace("_", "-"), id=conn_id, user=user
+            )
+            rendered = "{{ exec `" + command + "` }}"
+        else:
+            rendered = "{{ env `DBEE_PW_" + slug(name) + "` }}"
+            if password:
+                warn(f"{name!r}: password left out, set $DBEE_PW_{slug(name)}")
+
+        out.append(
+            {
+                "id": f"dbeaver_{slug(name).lower()}",
+                "name": name,
+                "type": dbee_type,
+                "url": build_url(
+                    dbee_type,
+                    cfg,
+                    user,
+                    rendered if password or user else "",
+                    encode_password=args.with_passwords,
+                ),
+            }
+        )
+
+    return out
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Convert DBeaver connections into an nvim-dbee persistence.json"
+    )
+    parser.add_argument("--workspace", help="DBeaver workspace dir or data-sources.json")
+    parser.add_argument("-o", "--out", help="write to this file instead of stdout")
+    parser.add_argument(
+        "--password-command",
+        help="shell command that prints the password, e.g. 'pass db/{slug}'. "
+        "Placeholders: {slug} {name} {id} {user}",
+    )
+    parser.add_argument(
+        "--with-passwords",
+        action="store_true",
+        help="inline the decrypted passwords (plain text, like DBeaver does)",
+    )
+    args = parser.parse_args()
+
+    connections = []
+    for path in find_data_sources(args.workspace):
+        warn(f"reading {path}")
+        connections.extend(convert(path, args))
+
+    if not connections:
+        die("nothing to convert")
+
+    rendered = json.dumps(connections, indent=2) + "\n"
+
+    if args.out:
+        out = Path(args.out).expanduser()
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(rendered)
+        warn(f"wrote {len(connections)} connection(s) to {out}")
+    else:
+        sys.stdout.write(rendered)
+
+
+if __name__ == "__main__":
+    main()
