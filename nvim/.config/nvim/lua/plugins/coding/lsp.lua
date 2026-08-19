@@ -251,6 +251,24 @@ return {
       -- is not supported by any server activated for this buffer".
       if vim.fn.executable 'gopls' == 1 then
         vim.lsp.enable 'gopls'
+
+        -- Run `source.organizeImports` before saving Go files so gopls adds
+        -- missing imports and removes unused ones (goimports behaviour).
+        vim.api.nvim_create_autocmd('BufWritePre', {
+          pattern = '*.go',
+          callback = function()
+            local params = vim.lsp.util.make_range_params(0, 'utf-8')
+            params.context = { only = { 'source.organizeImports' } }
+            local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params, 1000)
+            for _, res in pairs(result or {}) do
+              for _, action in pairs(res.result or {}) do
+                if action.edit then
+                  vim.lsp.util.apply_workspace_edit(action.edit, 'utf-8')
+                end
+              end
+            end
+          end,
+        })
       else
         vim.notify('gopls not found on PATH; Go LSP disabled. Run: mise install', vim.log.levels.WARN)
       end
