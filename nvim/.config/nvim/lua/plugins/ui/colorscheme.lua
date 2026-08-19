@@ -15,7 +15,7 @@ local themes = {
   { label = "Catppuccin Latte (light)", scheme = "catppuccin-latte", background = "light" },
   { label = "Everforest (dark)", scheme = "everforest", background = "dark" },
   { label = "Everforest (light)", scheme = "everforest", background = "light" },
-  { label = "Gruvbox (dark)", scheme = "gruvbox", background = "dark" },
+  { label = "Gruvbox (dark)", scheme = "gruvbox-material", background = "dark" },
   { label = "Rose Pine", scheme = "rose-pine-moon", background = "dark" },
 }
 
