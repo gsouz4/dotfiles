@@ -30,80 +30,54 @@ return {
       picker = {
         enabled = true,
 
-        -- Default picker configuration
-        opts = {
-          -- File ignore patterns for better performance (same as telescope)
-          file_ignore_patterns = {
-            'node_modules',
-            '.git/',
-            'target/',
-            'build/',
-            '%.o',
-            '%.a',
-            '%.out',
-            '%.class',
-            '%.pdf',
-            '%.mkv',
-            '%.mp4',
-            '%.zip',
-          },
+        -- Per-picker overrides live under `sources`, not `pickers`/`opts`.
+        -- Snacks silently drops unknown keys, so a typo here means the whole
+        -- block is dead config and every source falls back to its defaults.
 
-          -- Enable frecency for smart file ranking
-          frecency = {
-            enabled = true,
-            -- Files accessed more recently and frequently rank higher
-            max_timestamps = 100,
-          },
-
-          -- Git integration features
-          git = {
-            enabled = true,
-            -- Show git status in file picker
-            show_status = true,
-          },
-
-          -- Preview configuration
-          preview = {
-            enabled = true,
-            -- Enable image previews (snacks exclusive feature)
-            images = true,
-            -- Enable treesitter highlighting in preview
-            treesitter = true,
-          },
-
-          -- UI configuration
-          ui = {
-            -- Window border style
-            border = 'rounded',
-            -- Results window height
-            height = 0.8,
-            -- Results window width
-            width = 0.8,
-          },
+        -- Fuzzy matching
+        matcher = {
+          frecency = true, -- rank recently/frequently opened files higher
         },
 
-        -- Picker-specific configurations
-        pickers = {
+        sources = {
           files = {
-            -- Include hidden files but respect gitignore
+            -- Stow packages keep everything under dot dirs (`nvim/.config/...`,
+            -- `claude/.claude/...`). Without `hidden` the picker never descends
+            -- into them and this repo looks like 8 files.
             hidden = true,
-            -- Use ripgrep for file finding
-            find_command = { 'rg', '--files', '--hidden', '--glob', '!**/.git/*' },
+            ignored = false, -- still respect .gitignore
+            exclude = {
+              'node_modules',
+              'target',
+              'build',
+              '*.o',
+              '*.a',
+              '*.out',
+              '*.class',
+              '*.pdf',
+              '*.mkv',
+              '*.mp4',
+              '*.zip',
+            },
           },
 
           grep = {
-            -- Search in hidden files but respect gitignore
-            additional_args = { '--hidden', '--glob', '!**/.git/*' },
+            -- Same reasoning as `files`: dot dirs hold the actual config.
+            hidden = true,
+            ignored = false,
+            exclude = {
+              'node_modules',
+              'target',
+              'build',
+              '*.pdf',
+              '*.mkv',
+              '*.mp4',
+              '*.zip',
+            },
           },
 
           buffers = {
-            -- Sort buffers by last used
             sort_lastused = true,
-          },
-
-          oldfiles = {
-            -- Include files from other projects
-            include_current_session = true,
           },
         },
       },
