@@ -193,9 +193,41 @@ return {
           },
         },
 
+        -- TypeScript / JavaScript Language Server
+        -- Root dir and filetypes come from nvim-lspconfig's bundled `lsp/ts_ls.lua`,
+        -- which vim.lsp.config merges with the table below.
+        ts_ls = {
+          settings = {
+            -- Inlay hints, mirroring the rust_analyzer and gopls setups above.
+            -- ts_ls keeps a separate settings block per language: the JS one is
+            -- not inherited from the TS one, so both have to be spelled out.
+            typescript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'literals',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = false,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+            javascript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'literals',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = false,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+          },
+        },
+
         -- Add more servers as needed:
         -- Python: pyright = {} or pylsp = {}
-        -- JavaScript/TypeScript: ts_ls = {}
         -- C/C++: clangd = {}
         -- See `:help lspconfig-all` for complete list
       }
@@ -212,8 +244,15 @@ return {
 
       local ensure_installed = vim.list_extend(mason_managed, {
         'stylua', -- Lua formatter
+
+        -- Web formatters. conform maps js/ts/json/css/... to prettierd with a
+        -- prettier fallback (see coding/formatting.lua); without these two
+        -- installed, `<leader>f` on a TS buffer silently did nothing.
+        'prettierd',
+        'prettier',
+
         -- Add other tools as needed:
-        -- 'prettier', 'eslint_d', 'black', 'isort', etc.
+        -- 'eslint_d', 'black', 'isort', etc.
       })
 
       require('mason-tool-installer').setup {

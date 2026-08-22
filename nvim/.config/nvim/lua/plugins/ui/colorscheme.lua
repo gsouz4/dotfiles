@@ -106,10 +106,6 @@ return {
   },
 
   {
-    "rockerBOO/boo-colorscheme-nvim",
-  },
-
-  {
     "sainnhe/gruvbox-material",
     priority = 1000,
     opts = ...,
@@ -124,7 +120,13 @@ return {
     "rose-pine/neovim",
     name = "rose-pine",
     config = function()
-      vim.cmd "colorscheme rose-pine-moon"
+      require("rose-pine").setup {
+        styles = {
+          bold = true,
+          italic = true,
+        },
+      }
+      -- vim.cmd "colorscheme rose-pine-moon"
     end,
   },
 }
