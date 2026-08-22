@@ -21,12 +21,6 @@ return {
     ft = 'javascript', -- Only load for JavaScript files
   },
 
-  -- TypeScript syntax highlighting
-  {
-    'leafgarland/typescript-vim',
-    ft = 'typescript', -- Only load for TypeScript files
-  },
-
   -- ===================================================================
   -- Lean 4 Theorem Prover
   -- ===================================================================

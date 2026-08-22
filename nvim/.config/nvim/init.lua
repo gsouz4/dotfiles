@@ -78,7 +78,7 @@ For a complete guide, see README.md
 
 -- Load the main configuration module
 -- This handles loading all other configuration in the correct order
-require('config')
+require "config"
 
 -- ===================================================================
 -- Legacy Compatibility

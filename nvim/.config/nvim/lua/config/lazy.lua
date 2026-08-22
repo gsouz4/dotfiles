@@ -69,7 +69,7 @@ require('lazy').setup({
   -- ===================================================================
   install = {
     -- Try to load one of these colorschemes when starting an installation during startup
-    colorscheme = { 'everforest' },
+    colorscheme = { 'catppuccin-frappe' },
   },
 
   -- Automatically check for plugin updates but don't notify

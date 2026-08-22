@@ -1,7 +1,7 @@
 -- ===================================================================
 -- Colorscheme Configuration
 -- ===================================================================
--- Default: Catppuccin (mocha). Everforest is kept installed as a secondary
+-- Default: Catppuccin (frappé). Everforest is kept installed as a secondary
 -- theme. Switch between them at runtime with the picker below:
 --   :ColorschemePick   or   <leader>tc   or   :lua SwitchColorscheme()
 -- Toggle dark/light for the active theme with <leader>tt (see keymaps.lua).
@@ -53,10 +53,10 @@ return {
 
     config = function()
       require("catppuccin").setup {
-        flavour = "mocha", -- default flavour
+        flavour = "frappe", -- default flavour
         -- Flavour follows 'background' when applied via the generic
-        -- `catppuccin` scheme, so <leader>tt swaps latte <-> mocha.
-        background = { light = "latte", dark = "mocha" },
+        -- `catppuccin` scheme, so <leader>tt swaps latte <-> frappé.
+        background = { light = "latte", dark = "frappe" },
         transparent_background = false,
         integrations = {
           treesitter = true,
@@ -70,8 +70,8 @@ return {
       }
 
       -- Apply as the default colorscheme.
-      -- vim.o.background = 'dark'
-      -- vim.cmd.colorscheme 'catppuccin-frappe'
+      vim.o.background = "dark"
+      vim.cmd.colorscheme "catppuccin-frappe"
 
       -- Expose the switcher via a command and a keymap.
       vim.api.nvim_create_user_command("ColorschemePick", SwitchColorscheme, { desc = "Pick a colorscheme" })
