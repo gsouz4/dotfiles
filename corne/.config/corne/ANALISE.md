@@ -11,8 +11,6 @@ Gerado do `keymap-dump.json` (lido da EEPROM). VIA protocolo 9.
 | **total** | **58** | **42** | **-16** |
 | encoders | 2 | 0 | -2 |
 
-A fileira perdida e a numerica. Os 4 polegares a menos sao o outro aperto.
-
 ## Ocupacao das camadas
 
 - camada 0: 46 teclas
@@ -46,15 +44,17 @@ Deliberadamente fora (nao usados):
 
 ## Pendencias em aberto
 
-1. **Sem Super esquerdo na camada 0** — so RGUI no polegar direito. Bloqueia
-   atalhos do tipo `Super+H`, que cairiam na mesma mao.
-2. **CAPS ocupa um polegar** nas camadas 0 e 1. Posicao cara, tecla pouco usada.
-   Candidata a ceder o lugar pro Super esquerdo ou pro AltGr.
-3. **Camadas sao TG (toggle), nao MO (momentaneo)** — para a camada 1, usada o
-   tempo todo, MO tende a errar menos.
-4. **PrintScreen esta na camada 3**, alcancavel so via camada 1 + TG(3).
-   Quatro acoes para um print. A camada 2 tem espaco e fica a um toque.
-5. **LALT na posicao do S da camada 2** — provavel sobra do layout de fabrica.
+1. **Camada 1, posicao do A, esta como `1` e nao `Shift+1`** — o resto da fileira
+   e toda `Shift+N` (`@ # $ % ^ & * ( )`). Como esta, sai o digito `1`, que ja
+   existe na linha de cima, e o `!` nao existe em lugar nenhum.
+2. **Sem Super esquerdo na camada 0** — so RGUI no polegar direito.
+3. **CAPS ocupa um polegar** nas camadas 0 e 1. Candidata a ceder o lugar.
+4. **Camadas sao TG (toggle), nao MO (momentaneo)**.
+5. **PrintScreen na camada 3**, alcancavel so via camada 1 + TG(3).
 6. **Layout do sistema**: `us` e `br` configurados. O keymap foi desenhado para
-   `us`; em `br` os simbolos `[ ] \ ; ' /` saem diferentes. Alternativa avaliada
-   e nao aplicada: layout unico `us(altgr-intl)`.
+   `us`. Alternativa avaliada e nao aplicada: layout unico `us(altgr-intl)`.
+
+## Nota sobre backup
+
+O `.vil` cobre mais que o `keymap-dump.json`: tap dance e key override ficam
+em outra regiao da EEPROM e nao aparecem na API VIA que o dump usa.

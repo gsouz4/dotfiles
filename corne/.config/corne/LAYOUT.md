@@ -14,7 +14,7 @@ L3      LALT      CAPS       ---      LCTL     TG(1)       ENT  |        SPC    
 ### Camada 1  — 45 teclas
 ```
 L0       TAB         1         2         3         4         5  |       RCTL         6         7         8         9         0
-L1      LCTL         1    SFT(2)    SFT(3)    SFT(4)    SFT(5)  |       RALT      LEFT      DOWN        UP      RGHT      SCLN
+L1      LCTL    SFT(1)    SFT(2)    SFT(3)    SFT(4)    SFT(5)  |       RALT    SFT(6)    SFT(7)    SFT(8)    SFT(9)    SFT(0)
 L2      LSFT       EQL      MINS  SFT(EQL)      LBRC      TRNS  |        ---         N      RBRC      COMM       DOT      SLSH
 L3      LCTL      CAPS       ---      LGUI     TG(1)       SPC  |        ENT     TG(3)      RGUI      BSPC      QUOT       ESC
 ```
