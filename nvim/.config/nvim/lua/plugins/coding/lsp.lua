@@ -226,6 +226,12 @@ return {
           },
         },
 
+        -- Elixir Language Server (Expert, the official successor to
+        -- ElixirLS/Lexical). Mason ships it as a standalone binary, so it
+        -- follows the normal flow: mason-tool-installer installs it and
+        -- mason-lspconfig's automatic_enable starts it on elixir/heex buffers.
+        expert = {},
+
         -- Add more servers as needed:
         -- Python: pyright = {} or pylsp = {}
         -- C/C++: clangd = {}

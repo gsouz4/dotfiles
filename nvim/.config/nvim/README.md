@@ -119,6 +119,7 @@ Managed by Mason. Auto-installed:
 - **rust_analyzer** - Clippy on save, all cargo features, proc macros, inlay hints
 - **lua_ls** - Neovim Lua with LazyDev integration
 - **golangci_lint_ls** - Go diagnostics only, no navigation
+- **expert** - Elixir (official successor to ElixirLS/Lexical), standalone binary, attaches to elixir/heex buffers
 
 Not from Mason:
 

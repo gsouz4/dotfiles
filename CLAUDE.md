@@ -139,6 +139,7 @@ Lives in `nvim/.config/nvim/`. Stowed to `~/.config/nvim/`. Full reference in [`
 - `lua_ls` - Neovim Lua development with LazyDev
 - `gopls` - staticcheck, gofumpt, unusedparams/shadow analyses, inlay hints
 - `golangci_lint_ls` - Go diagnostics only (installed via Mason UI, auto-enabled)
+- `expert` - Elixir LSP (official successor to ElixirLS), installed via Mason, auto-enabled
 
 Servers are registered with `vim.lsp.config()` and enabled by `mason-lspconfig`'s `automatic_enable`. mason-lspconfig v2 removed the `handlers` option — do not reintroduce it, it is silently ignored and the whole `servers` table stops taking effect.
 

@@ -64,6 +64,10 @@ vim.keymap.set('n', '<leader>cz', ':let @+ = expand("%:p")<CR>', {
 -- New empty buffer in current window
 vim.keymap.set('n', '<leader>vn', '<cmd>enew<CR>', { desc = '[V]new empty buffer', silent = true })
 
+-- Alternate file: single-key replacement for Ctrl-^, which needs two adjacent
+-- thumb keys on the Corne. Backspace's default (cursor left) is redundant with h.
+vim.keymap.set('n', '<BS>', '<C-^>', { desc = 'Alternate file' })
+
 -- Move selection up/down in visual mode (Shift+V then Shift+j/k)
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move selection down', silent = true })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move selection up', silent = true })

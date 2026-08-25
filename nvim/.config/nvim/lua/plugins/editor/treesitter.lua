@@ -52,6 +52,11 @@ return {
       'rust',
       'go',
 
+      -- Elixir
+      'elixir',
+      'heex',
+      'eex',
+
       -- Markup and data
       'markdown',
       'markdown_inline',
