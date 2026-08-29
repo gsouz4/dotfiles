@@ -60,7 +60,9 @@ return {
     end,
     init = function()
       vim.g.mkdp_theme = 'dark' -- GitHub dark; 'light' also available
-      vim.g.mkdp_auto_close = 1 -- close the tab when leaving the buffer
+      -- Keep the preview alive when switching buffers: the herdr pane below
+      -- outlives buffer changes, so auto-close would just leave it stale.
+      vim.g.mkdp_auto_close = 0
 
       -- Route the preview into a herdr pane running terminal-browser, so the
       -- GitHub-style render sits side by side with the buffer instead of in a
@@ -68,16 +70,29 @@ return {
       -- not inside herdr or terminal-browser is missing (other machines, ssh).
       vim.g.mkdp_browserfunc = 'MkdpOpenPreview'
 
-      local preview_pane -- reuse/replace the pane across preview toggles
+      -- Lifecycle: the mkdp server dies with nvim (it is a child job), the
+      -- terminal-browser process dies with its pane, and the pane is closed
+      -- here — on replace, on toggle-off, and on nvim exit — so nothing is
+      -- left orphaned eating a Chromium's worth of memory.
+      local preview_pane
+
+      local function close_pane(wait)
+        if not preview_pane then
+          return
+        end
+        local proc = vim.system { 'herdr', 'pane', 'close', preview_pane }
+        if wait then
+          proc:wait(2000)
+        end
+        preview_pane = nil
+      end
+
       _G.MkdpOpenPreview = function(url)
         if not (vim.env.HERDR_PANE_ID and vim.fn.executable 'terminal-browser' == 1) then
           vim.ui.open(url)
           return
         end
-        if preview_pane then
-          vim.system({ 'herdr', 'pane', 'close', preview_pane }):wait()
-          preview_pane = nil
-        end
+        close_pane(true)
         local split = vim.system({ 'herdr', 'pane', 'split', '--current', '--direction', 'right', '--no-focus' }, { text = true }):wait()
         local ok, res = pcall(vim.json.decode, split.stdout or '')
         local pane = ok and res.result and res.result.pane and res.result.pane.pane_id or nil
@@ -94,9 +109,33 @@ return {
           call v:lua.MkdpOpenPreview(a:url)
         endfunction
       ]]
+
+      -- Toggle that also tears the pane down. :MarkdownPreviewToggle alone
+      -- would stop the server but leave the pane showing a dead page.
+      _G.MkdpTogglePreview = function()
+        if preview_pane then
+          pcall(vim.cmd, 'MarkdownPreviewStop')
+          close_pane(false)
+        else
+          vim.cmd 'MarkdownPreview'
+        end
+      end
+
+      vim.api.nvim_create_autocmd('VimLeavePre', {
+        group = vim.api.nvim_create_augroup('mkdp-herdr-cleanup', { clear = true }),
+        callback = function()
+          close_pane(true)
+        end,
+      })
     end,
     keys = {
-      { '<leader>mg', '<cmd>MarkdownPreviewToggle<CR>', desc = '[M]arkdown [G]itHub-style preview' },
+      {
+        '<leader>mg',
+        function()
+          _G.MkdpTogglePreview()
+        end,
+        desc = '[M]arkdown [G]itHub-style preview',
+      },
     },
   },
 }
