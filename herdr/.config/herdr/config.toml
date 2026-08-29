@@ -5,7 +5,7 @@ onboarding = false
 
 [theme]
 # name = "catppuccin"
-name = "rose-pine"
+name = "gruvbox"
 # name = "gruvbox"
 
 
@@ -30,3 +30,9 @@ position = "bottom-right"
 
 [ui]
 agent_panel_sort = "priority"
+
+[experimental]
+# Kitty graphics passthrough (added in 0.8.x, off by default). Ghostty
+# implements the protocol, so panes can show real pixels — required by
+# terminal-browser and the markdown preview flow.
+kitty_graphics = true
