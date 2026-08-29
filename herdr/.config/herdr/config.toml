@@ -31,6 +31,13 @@ position = "bottom-right"
 [ui]
 agent_panel_sort = "priority"
 
+# AI usage dashboard (ai-usagebar-tui) in a temporary vertical pane.
+# type = "pane" closes the pane when the TUI exits (press q).
+[[keys.command]]
+key = "prefix+u"
+type = "pane"
+command = "$HOME/.cargo/bin/ai-usagebar-tui"
+
 [experimental]
 # Kitty graphics passthrough (added in 0.8.x, off by default). Ghostty
 # implements the protocol, so panes can show real pixels — required by

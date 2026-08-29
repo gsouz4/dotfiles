@@ -4,30 +4,25 @@ ZSH_THEME=""
 plugins=(git)
 source $ZSH/oh-my-zsh.sh
 
-# Prompt: line 1 = path:branch, line 2 = cursor
-precmd() {
-  local branch=$(git symbolic-ref --short HEAD 2>/dev/null)
-  local git_info=""
-  if [[ -n "$branch" ]]; then
-    git_info=":%F{green}${branch}%f"
-    [[ -n $(git status --porcelain 2>/dev/null) ]] && git_info+=" %F{red}✗%f"
-  fi
-  PROMPT=$'\n'"%F{blue}%~%f${git_info}"$'\n'"%F{yellow}❯%f "
-}
-
+# Prompt: starship (gruvbox-rainbow preset, config in ~/.config/starship.toml)
+# Binary comes from mise, so this must run after mise activate (see bottom).
 # Editor
 export TERM="xterm-256color"
 alias vim=nvim
 export MANPAGER="nvim +Man!"
 
-# gd build flags (required by some Ruby gems)
-export LDFLAGS="-L$(brew --prefix gd)/lib"
-export CPPFLAGS="-I$(brew --prefix gd)/include"
-export CFLAGS="-I$(brew --prefix gd)/include"
-export PKG_CONFIG_PATH="$(brew --prefix gd)/lib/pkgconfig"
-export C_INCLUDE_PATH="$(brew --prefix gd)/include"
-export LIBRARY_PATH="$(brew --prefix gd)/lib"
-export LD_LIBRARY_PATH="$(brew --prefix gd)/lib"
+# gd build flags (required by some Ruby gems). brew is macOS-only here, so
+# guard it -- on Linux machines every new shell would print "command not
+# found: brew" seven times otherwise.
+if command -v brew >/dev/null 2>&1; then
+  export LDFLAGS="-L$(brew --prefix gd)/lib"
+  export CPPFLAGS="-I$(brew --prefix gd)/include"
+  export CFLAGS="-I$(brew --prefix gd)/include"
+  export PKG_CONFIG_PATH="$(brew --prefix gd)/lib/pkgconfig"
+  export C_INCLUDE_PATH="$(brew --prefix gd)/include"
+  export LIBRARY_PATH="$(brew --prefix gd)/lib"
+  export LD_LIBRARY_PATH="$(brew --prefix gd)/lib"
+fi
 
 # opam (OCaml)
 [[ ! -r "$HOME/.opam/opam-init/init.zsh" ]] || source "$HOME/.opam/opam-init/init.zsh" > /dev/null 2> /dev/null
@@ -64,3 +59,6 @@ eval "$(mise activate zsh)"
 export PATH="$PATH:$HOME/.local/share/mise/shims"
 
 [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+
+# starship prompt. Last so nothing above (oh-my-zsh, gvm) overrides PROMPT.
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
