@@ -218,6 +218,7 @@ The `claude` stow package manages hooks, skills, MCP servers, and portable setti
 |------|---------|-------------|
 | `vault-session-load.sh` | SessionStart | Loads last session recap + related vault notes (score >= 70%) |
 | `notify-ready.sh` | Stop, Notification | macOS notification + sound + tmux window highlight when Claude finishes in a background window |
+| `worklog-capture.py` | Stop | Appends a raw record of each turn (project, branch, edits, commits, summary) to `~/vault/work/raw/YYYY-MM-DD.jsonl`. No LLM call. Consolidated by `/eod` |
 
 ### Skills
 
@@ -233,6 +234,8 @@ The `claude` stow package manages hooks, skills, MCP servers, and portable setti
 | `/pair-review` | Interactive pair review of a PR |
 | `/qa` | Smoke-test changes in the browser, validate behavior, plan fixes |
 | `/browser` | Browser automation via agent-browser CLI |
+| `/eod` | Consolidate the day's raw work log into `~/vault/work/daily/` with a ready-to-read block for the daily standup |
+| `/sprint-recap` | Consolidate daily notes of a date range into `~/vault/work/sprints/`, grouped by ticket |
 
 `~/.claude/skills` is a directory-level symlink. New skills added to `claude/.claude/skills/` appear automatically without restow.
 

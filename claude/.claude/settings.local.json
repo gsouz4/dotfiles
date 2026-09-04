@@ -42,5 +42,19 @@
       "Bash(stow -n -v -t ~ herdr)",
       "Bash(stow -t ~ herdr)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/worklog-capture.py",
+            "timeout": 30,
+            "async": true
+          }
+        ]
+      }
+    ]
   }
 }

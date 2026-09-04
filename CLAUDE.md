@@ -54,10 +54,11 @@ Lives in `claude/.claude/`. Stowed to `~/.claude/`.
 
 - `vault-session-load.sh` — SessionStart. Loads last session recap + related vault notes (score >= 70% via qmd)
 - `notify-ready.sh` — Stop + Notification. Sound + tmux window highlight when Claude finishes in a background window
+- `worklog-capture.py` — Stop. Appends a raw JSONL record of the turn to `~/vault/work/raw/`. Deterministic, no LLM. `/eod` turns it into the daily note, `/sprint-recap` rolls days into a sprint note. Registered in `settings.local.json`
 
 ### Skills (shared with pi)
 
-`/vault`, `/note`, `/recap`, `/skill-creator`, `/qa`, `/browser`
+`/vault`, `/note`, `/recap`, `/skill-creator`, `/qa`, `/browser`, `/eod`, `/sprint-recap`
 
 `~/.claude/skills` is a directory-level symlink to `claude/.claude/skills/`. New skills appear automatically without restow.
 
