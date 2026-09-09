@@ -30,6 +30,10 @@ position = "bottom-right"
 
 [ui]
 agent_panel_sort = "priority"
+# Collapsed sidebar takes zero width instead of the 4-column status rail. The
+# rail has no padding between the status dot and the border (COLLAPSED_WIDTH
+# is hardcoded to 4 upstream), so the dots visually bleed into the pane frame.
+sidebar_collapsed_mode = "hidden"
 
 # AI usage dashboard (ai-usagebar-tui) in a temporary vertical pane.
 # type = "pane" closes the pane when the TUI exits (press q).

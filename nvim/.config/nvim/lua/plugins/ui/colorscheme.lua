@@ -1,8 +1,8 @@
 -- ===================================================================
 -- Colorscheme Configuration
 -- ===================================================================
--- Default: Catppuccin (frappé). Everforest is kept installed as a secondary
--- theme. Switch between them at runtime with the picker below:
+-- Default: Catppuccin (frappé). Everforest and the others are kept installed
+-- as alternatives. Switch between them at runtime with the picker below:
 --   :ColorschemePick   or   <leader>tc   or   :lua SwitchColorscheme()
 -- Toggle dark/light for the active theme with <leader>tt (see keymaps.lua).
 
@@ -17,6 +17,9 @@ local themes = {
   { label = "Everforest (light)", scheme = "everforest", background = "light" },
   { label = "Gruvbox (dark)", scheme = "gruvbox-material", background = "dark" },
   { label = "Rose Pine", scheme = "rose-pine-moon", background = "dark" },
+  { label = "Iceberg (dark)", scheme = "iceberg", background = "dark" },
+  { label = "Iceberg (light)", scheme = "iceberg", background = "light" },
+  { label = "Vague (dark)", scheme = "vague", background = "dark" },
 }
 
 local function apply_theme(theme)
@@ -71,7 +74,7 @@ return {
 
       -- Apply as the default colorscheme.
       vim.o.background = "dark"
-      vim.cmd.colorscheme "catppuccin-frappe"
+      -- vim.cmd.colorscheme "catppuccin-frappe"
 
       -- Expose the switcher via a command and a keymap.
       vim.api.nvim_create_user_command("ColorschemePick", SwitchColorscheme, { desc = "Pick a colorscheme" })
@@ -127,6 +130,30 @@ return {
         },
       }
       -- vim.cmd "colorscheme rose-pine-moon"
+    end,
+  },
+
+  -- =================================================================
+  -- Iceberg — classic dark-blue palette; light variant follows 'background'
+  -- https://github.com/cocopon/iceberg.vim
+  -- =================================================================
+  {
+    "cocopon/iceberg.vim",
+    lazy = false,
+    priority = 900,
+  },
+
+  -- =================================================================
+  -- Vague — muted grey-blue palette, minimal accent colours
+  -- https://github.com/vague2k/vague.nvim
+  -- =================================================================
+  {
+    "vague2k/vague.nvim",
+    lazy = false,
+    priority = 900,
+    opts = {},
+    config = function()
+      vim.cmd "colorscheme vague"
     end,
   },
 }

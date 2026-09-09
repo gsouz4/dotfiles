@@ -22,6 +22,8 @@ return {
       },
     },
     filesystem = {
+      -- Keep the tree in sync with the active buffer when switching files.
+      follow_current_file = { enabled = true },
       filtered_items = {
         visible = true,
         hide_dotfiles = false,
