@@ -399,7 +399,32 @@ else
 fi
 
 # ---------------------------------------------------------------------
-# 10. Interactive GitHub SSH Key Setup
+# 10. Fifine USB Microphone (capture gain + default input)
+# ---------------------------------------------------------------------
+# At 100% the Fifine's hardware gain is +31 dB and every recording is full of
+# hiss; 65% (~+20 dB) removes it while still picking up voice and key clicks.
+# WirePlumber persists both settings in ~/.local/state/wireplumber, which is
+# per-machine state and not worth tracking. Skipped when the mic is unplugged.
+status_echo "Checking Fifine Microphone..."
+
+if amixer -c Microphone sget Mic &> /dev/null; then
+    echo "🎙️  Setting Fifine capture gain to 65%..."
+    amixer -q -c Microphone sset Mic 65%
+
+    # wpctl only takes numeric node ids, which change between boots.
+    FIFINE_ID="$(wpctl status 2>/dev/null | awk '/Sources:/,/Filters:/' | grep -i fifine | grep -oE '[0-9]+\.' | head -1 | tr -d . || true)"
+    if [ -n "$FIFINE_ID" ]; then
+        echo "🎙️  Making Fifine the default input..."
+        wpctl set-default "$FIFINE_ID"
+    else
+        echo "⚠️  Fifine not found in PipeWire sources; default input unchanged."
+    fi
+else
+    echo "⏭️  [SKIP] Fifine Microphone not connected."
+fi
+
+# ---------------------------------------------------------------------
+# 11. Interactive GitHub SSH Key Setup
 # ---------------------------------------------------------------------
 status_echo "Checking GitHub SSH Setup..."
 SSH_KEY="$HOME/.ssh/id_ed25519"

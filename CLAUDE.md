@@ -32,6 +32,7 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 - nvim CI workflow lives at repo root `.github/workflows/ci.yml` with path filter
 - Never use `git add -A`. Always stage files explicitly
 - `~/vault` symlinks to Obsidian iCloud storage. Skills and hooks depend on `qmd` for semantic search
+- Fifine USB mic: `setup.sh` sets its capture gain to 65% (100% = +31 dB, full of hiss) and makes it the default input. Only runs if the mic is plugged in. WirePlumber state (`~/.local/state/wireplumber/`) is not tracked
 - pi (coding agent) config lives in `pi/.pi/agent/`. Skills shared with Claude Code via `"skills": ["~/.claude/skills"]` in pi settings
 
 ## Packages
