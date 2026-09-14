@@ -57,6 +57,10 @@ return {
       'heex',
       'eex',
 
+      -- OCaml (.ml and .mli)
+      'ocaml',
+      'ocaml_interface',
+
       -- Markup and data
       'markdown',
       'markdown_inline',

@@ -54,6 +54,9 @@ return {
       -- Go
       go = { 'gofmt' },
 
+      -- OCaml (from opam; only formats projects with a .ocamlformat file)
+      ocaml = { 'ocamlformat' },
+
       -- Shell scripts
       sh = { 'shfmt' },
       bash = { 'shfmt' },

@@ -59,7 +59,9 @@ Lives in `claude/.claude/`. Stowed to `~/.claude/`.
 
 ### Skills (shared with pi)
 
-`/vault`, `/note`, `/recap`, `/skill-creator`, `/qa`, `/browser`, `/eod`, `/sprint-recap`
+`/vault`, `/note`, `/recap`, `/skill-creator`, `/qa`, `/browser`, `/eod`, `/sprint-recap`, `/almanac`
+
+`/almanac` logs a study session to the personal site (`~/Documents/me`, `src/data/studies.json`).
 
 `~/.claude/skills` is a directory-level symlink to `claude/.claude/skills/`. New skills appear automatically without restow.
 
@@ -142,14 +144,17 @@ Lives in `nvim/.config/nvim/`. Stowed to `~/.config/nvim/`. Full reference in [`
 - `gopls` - staticcheck, gofumpt, unusedparams/shadow analyses, inlay hints
 - `golangci_lint_ls` - Go diagnostics only (installed via Mason UI, auto-enabled)
 - `expert` - Elixir LSP (official successor to ElixirLS), installed via Mason, auto-enabled
+- `ocamllsp` - OCaml LSP, installed via opam (`opam install ocaml-lsp-server`), not Mason
 
 Servers are registered with `vim.lsp.config()` and enabled by `mason-lspconfig`'s `automatic_enable`. mason-lspconfig v2 removed the `handlers` option — do not reintroduce it, it is silently ignored and the whole `servers` table stops taking effect.
 
 `gopls` is the exception: it comes from mise, not Mason, so `automatic_enable` never sees it and `lsp.lua` calls `vim.lsp.enable 'gopls'` explicitly. It is filtered out of `ensure_installed` so Mason does not install a competing copy.
 
+`ocamllsp` follows the same pattern, but comes from the active opam switch: it must be built against the project's compiler, so Mason's prebuilt copy is excluded. `lsp.lua` enables it only when the binary is on PATH, silently otherwise.
+
 ### Formatters (conform)
 
-stylua (Lua), prettier (JS/TS/JSON), black+isort (Python), rustfmt, gofmt, clang-format, shfmt
+stylua (Lua), prettier (JS/TS/JSON), black+isort (Python), rustfmt, gofmt, ocamlformat, clang-format, shfmt
 
 ### Database client
 

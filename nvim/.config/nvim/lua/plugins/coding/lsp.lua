@@ -232,6 +232,11 @@ return {
         -- mason-lspconfig's automatic_enable starts it on elixir/heex buffers.
         expert = {},
 
+        -- OCaml Language Server
+        -- Binary comes from the active opam switch, not Mason -- see the
+        -- enable block below.
+        ocamllsp = {},
+
         -- Add more servers as needed:
         -- Python: pyright = {} or pylsp = {}
         -- C/C++: clangd = {}
@@ -244,8 +249,11 @@ return {
       -- Automatically install language servers and related tools.
       -- gopls is excluded: it is managed by mise via .tool-versions, and letting
       -- Mason install a second copy would leave two binaries racing on PATH.
+      -- ocamllsp is excluded: it must be built against the same compiler as the
+      -- project's opam switch, and Mason's prebuilt copy is not.
+      local not_mason = { gopls = true, ocamllsp = true }
       local mason_managed = vim.tbl_filter(function(name)
-        return name ~= 'gopls'
+        return not not_mason[name]
       end, vim.tbl_keys(servers or {}))
 
       local ensure_installed = vim.list_extend(mason_managed, {
@@ -316,6 +324,13 @@ return {
         })
       else
         vim.notify('gopls not found on PATH; Go LSP disabled. Run: mise install', vim.log.levels.WARN)
+      end
+
+      -- ocamllsp comes from opam (`opam install ocaml-lsp-server`), so like
+      -- gopls it is invisible to `automatic_enable`. Silent when missing: not
+      -- every machine does OCaml, and a warning on every startup would be noise.
+      if vim.fn.executable 'ocamllsp' == 1 then
+        vim.lsp.enable 'ocamllsp'
       end
 
       -- ===================================================================

@@ -151,8 +151,27 @@ return {
     "vague2k/vague.nvim",
     lazy = false,
     priority = 900,
-    opts = {},
     config = function()
+      require("vague").setup {
+        -- Lighter background than upstream's near-black default (#141415),
+        -- everything else stays the original vague palette.
+        colors = {
+          bg = "#1e1e22",
+          inactiveBg = "#26262c",
+        },
+        -- Neo-tree folder names default to `hint` (blue), which is also
+        -- shared by LSP diagnostics, neotest, rainbow delimiters, etc.
+        -- Repoint just `Directory` (the group NeoTreeDirectoryName/-Icon
+        -- link to) to `floatBorder` (the palette's neutral grey, otherwise
+        -- only used for float window borders) instead.
+        -- Note: NeoTreeRootName/NeoTreeDirectoryIcon are force-overridden
+        -- for every colorscheme by the global autocmd in config/autocmds.lua,
+        -- so they're intentionally left alone here.
+        on_highlights = function(highlights, colors)
+          highlights.Directory = { fg = colors.floatBorder }
+          highlights.NeoTreeSymbolicLinkTarget = { fg = colors.floatBorder }
+        end,
+      }
       vim.cmd "colorscheme vague"
     end,
   },

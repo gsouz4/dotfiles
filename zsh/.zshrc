@@ -62,3 +62,7 @@ export PATH="$PATH:$HOME/.local/share/mise/shims"
 
 # starship prompt. Last so nothing above (oh-my-zsh, gvm) overrides PROMPT.
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+# Added by flyctl installer
+export FLYCTL_INSTALL="/home/gsouza/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
