@@ -4,6 +4,17 @@
 -- Beautiful and informative status line that integrates with our theme
 -- See: https://github.com/nvim-lualine/lualine.nvim
 
+-- O terminal do claudecode.nvim tem nome `term://<cwd>//<pid>:<caminho do
+-- executável>`. Só na statusline, troca isso por "Claude". O bufnr vem do
+-- plugin; `package.loaded` evita carregar o claudecode só pra desenhar a barra.
+local function claude_name(str)
+  local term = package.loaded['claudecode.terminal']
+  if term and term.get_active_terminal_bufnr() == vim.api.nvim_get_current_buf() then
+    return 'Claude'
+  end
+  return str
+end
+
 return {
   'nvim-lualine/lualine.nvim',
   event = 'VeryLazy', -- Load after initial startup for better performance
@@ -54,6 +65,7 @@ return {
           'filename',
           -- Show relative path and modified status
           path = 1, -- 0 = filename, 1 = relative path, 2 = absolute path
+          fmt = claude_name,
           symbols = {
             modified = '●', -- Text to show when the buffer is modified
             readonly = '', -- Text to show when the buffer is readonly
@@ -104,6 +116,7 @@ return {
         {
           'filename',
           path = 1,
+          fmt = claude_name,
         },
       },
       lualine_x = { 'location' },

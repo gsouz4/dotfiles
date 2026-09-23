@@ -108,11 +108,27 @@ function M.setup_document_highlight(event)
   if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
     local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
 
-    -- Highlight references under cursor when holding still
+    -- Highlight references under cursor when holding still.
+    --
+    -- O suporte é rechecado aqui, e não só no attach acima: este autocmd é
+    -- buffer-local e sobrevive ao cliente que o registrou. Quando o servidor
+    -- que suportava documentHighlight sai (restart do ocamllsp, copilot
+    -- desanexando do buffer), o CursorHoldI continua disparando e
+    -- `vim.lsp.buf.document_highlight()` joga um toast no meio da digitação:
+    --   vim.lsp: method "textDocument/documentHighlight" is not supported
+    --   by any server activated for this buffer
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
       buffer = event.buf,
       group = highlight_augroup,
-      callback = vim.lsp.buf.document_highlight,
+      callback = function()
+        local supported = vim.lsp.get_clients {
+          bufnr = 0,
+          method = vim.lsp.protocol.Methods.textDocument_documentHighlight,
+        }
+        if #supported > 0 then
+          vim.lsp.buf.document_highlight()
+        end
+      end,
     })
 
     -- Clear highlights when cursor moves

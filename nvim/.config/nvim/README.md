@@ -112,6 +112,28 @@ Leader is `;` (semicolon).
 | `;cz` | Copy file path to clipboard |
 | `;db` | Toggle database UI (see [Database](#database)) |
 
+### AI (Claude Code)
+
+O `claude` roda num split à direita (ou numa janela flutuante, via `;iw`) e
+enxerga o Neovim como IDE: sabe o buffer ativo, recebe a seleção visual como
+contexto e propõe edições como diff nativo.
+Precisa ser aberto por estes keymaps — um `claude` de outra aba do terminal não
+conecta nesta instância.
+
+| Key | Action |
+|-----|--------|
+| `;ic` | Toggle do terminal do Claude (esconde/mostra no layout atual) |
+| `;iw` | Alternar layout: split à direita <-> janela flutuante |
+| `;if` | Focar o terminal (ou esconder, se já focado) |
+| `;ir` | Retomar uma sessão anterior (`--resume`) |
+| `;iC` | Continuar a última sessão (`--continue`) |
+| `;im` | Escolher o modelo |
+| `;ib` | Adicionar o buffer atual ao contexto |
+| `;is` | (visual) Enviar seleção / (file tree) adicionar arquivo |
+| `;ia` | Aceitar o diff proposto |
+| `;id` | Rejeitar o diff proposto |
+| `<C-.>` | Trocar o foco editor <-> Claude (split segue aberto; float esconde) |
+
 ## LSP servers
 
 Managed by Mason. Auto-installed:

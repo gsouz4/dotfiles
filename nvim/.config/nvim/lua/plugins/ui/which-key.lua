@@ -76,6 +76,9 @@ return {
 
       -- Git hunk operations (from gitsigns)
       { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+
+      -- IA / Claude Code (o prefixo `a` do upstream é do harpoon)
+      { '<leader>i', group = '[I]A / Claude', mode = { 'n', 'v' } },
     },
 
     -- Window configuration
