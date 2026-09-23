@@ -8,3 +8,4 @@
 **/.claude/scheduled_tasks.lock
 cortex/
 scratch/
+claude/.claude/skills/synced/
