@@ -1,10 +1,10 @@
 font-family = ZedMono Nerd Font Propo
 font-size = 12.5
-font-style = semibold
+font-style = bold
 
 theme = Ciapre
 
-background-opacity=0.90
+# background-opacity=0.90
 
 cursor-style = block
 cursor-style-blink = false
