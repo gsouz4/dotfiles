@@ -4,7 +4,7 @@ font-style = bold
 
 theme = Ciapre
 
-# background-opacity=0.90
+background-opacity=0.90
 
 cursor-style = block
 cursor-style-blink = false
@@ -17,9 +17,17 @@ window-padding-x = 10
 window-padding-y = 4
 window-decoration = none
 
+# Ultrawide 3440x1440: open a centered ~60% window instead of full width.
+# GNOME centers it (org.gnome.mutter center-new-windows = true).
+window-width = 210
+window-height = 58
+
 command = /bin/zsh
 
 keybind = shift+tab=toggle_maximize
 keybind = ctrl+t=new_tab
+# Bring the titlebar/borders back to resize by dragging, then hide them again.
+# reset_window_size would be the direct fix but is macOS-only.
+keybind = ctrl+shift+b=toggle_window_decorations
 
 

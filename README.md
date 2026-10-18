@@ -24,27 +24,27 @@ Provides: git, make, curl, gcc, unzip, clang-format.
 brew install stow nvim tmux asdf mise direnv jq ripgrep pipx reattach-to-user-namespace gd fswatch tig gh glow agent-browser ansible doctl awscli
 ```
 
-| Package | What it does |
-|---------|-------------|
-| `stow` | Symlink manager for dotfiles |
-| `nvim` | Neovim editor |
-| `tmux` | Terminal multiplexer |
-| `asdf` | Version manager for Node, Ruby, OCaml (legacy) |
-| `mise` | Version manager replacing asdf. Faster, reads `.tool-versions` natively |
-| `direnv` | Per-directory environment variables |
-| `jq` | JSON processor for shell |
-| `ripgrep` | Fast text search (used by nvim telescope) |
-| `pipx` | Install Python CLI tools in isolated envs |
-| `reattach-to-user-namespace` | macOS clipboard integration for tmux |
-| `gd` | Graphics library (needed to build Ruby image gems) |
-| `fswatch` | File change monitor (used by pair/dev skills) |
-| `tig` | Git browser / log viewer |
-| `gh` | GitHub CLI (used by commit skill for draft PRs) |
-| `glow` | Markdown renderer in terminal (used by nvim glow plugin) |
-| `agent-browser` | Browser automation CLI (used by /browser and /qa skills) |
-| `ansible` | Infrastructure automation (server provisioning, config management) |
-| `doctl` | DigitalOcean CLI (droplet management, DNS, snapshots) |
-| `awscli` | AWS CLI (S3, EC2, IAM — general cloud operations) |
+| Package                      | What it does                                                            |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `stow`                       | Symlink manager for dotfiles                                            |
+| `nvim`                       | Neovim editor                                                           |
+| `tmux`                       | Terminal multiplexer                                                    |
+| `asdf`                       | Version manager for Node, Ruby, OCaml (legacy)                          |
+| `mise`                       | Version manager replacing asdf. Faster, reads `.tool-versions` natively |
+| `direnv`                     | Per-directory environment variables                                     |
+| `jq`                         | JSON processor for shell                                                |
+| `ripgrep`                    | Fast text search (used by nvim telescope)                               |
+| `pipx`                       | Install Python CLI tools in isolated envs                               |
+| `reattach-to-user-namespace` | macOS clipboard integration for tmux                                    |
+| `gd`                         | Graphics library (needed to build Ruby image gems)                      |
+| `fswatch`                    | File change monitor (used by pair/dev skills)                           |
+| `tig`                        | Git browser / log viewer                                                |
+| `gh`                         | GitHub CLI (used by commit skill for draft PRs)                         |
+| `glow`                       | Markdown renderer in terminal (used by nvim glow plugin)                |
+| `agent-browser`              | Browser automation CLI (used by /browser and /qa skills)                |
+| `ansible`                    | Infrastructure automation (server provisioning, config management)      |
+| `doctl`                      | DigitalOcean CLI (droplet management, DNS, snapshots)                   |
+| `awscli`                     | AWS CLI (S3, EC2, IAM — general cloud operations)                       |
 
 ### 4. Oh My Zsh
 
@@ -66,10 +66,10 @@ Provides: cargo, rustfmt, rust-analyzer.
 cargo install stylua elan
 ```
 
-| Tool | What it does |
-|------|-------------|
+| Tool     | What it does                             |
+| -------- | ---------------------------------------- |
 | `stylua` | Lua code formatter (used by nvim and CI) |
-| `elan` | Lean 4 theorem prover toolchain manager |
+| `elan`   | Lean 4 theorem prover toolchain manager  |
 
 ### 7. Language runtimes via mise
 
@@ -95,17 +95,17 @@ mise doctor                     # Check mise health
 mise reshim                     # Rebuild shims after installing global npm/gem packages
 ```
 
-| Runtime | What it does |
-|---------|-------------|
-| `nodejs` | JavaScript runtime (provides npm/npx for tools) |
-| `ruby` | Ruby runtime |
-| `golang` | Go runtime |
-| `opam` | OCaml package manager and compiler |
-| `erlang` | Erlang VM |
-| `elixir` | Elixir runtime |
-| `neovim` | Editor, nightly (nvim-treesitter `main` needs >= 0.12) |
-| `tree-sitter` | Parser generator CLI (>= 0.26.1) |
-| `go:golang.org/x/tools/gopls` | Go language server, via mise's `go:` backend |
+| Runtime                       | What it does                                           |
+| ----------------------------- | ------------------------------------------------------ |
+| `nodejs`                      | JavaScript runtime (provides npm/npx for tools)        |
+| `ruby`                        | Ruby runtime                                           |
+| `golang`                      | Go runtime                                             |
+| `opam`                        | OCaml package manager and compiler                     |
+| `erlang`                      | Erlang VM                                              |
+| `elixir`                      | Elixir runtime                                         |
+| `neovim`                      | Editor, nightly (nvim-treesitter `main` needs >= 0.12) |
+| `tree-sitter`                 | Parser generator CLI (>= 0.26.1)                       |
+| `go:golang.org/x/tools/gopls` | Go language server, via mise's `go:` backend           |
 
 `gopls` is installed through mise rather than `go install` on purpose: `go install` honours `$GOBIN`, which on this machine gvm sets to `$GOROOT/bin` — inside the Go toolchain directory, wiped on the next Go upgrade. Install it with those vars stripped so the binary stays under mise's control:
 
@@ -133,11 +133,11 @@ asdf plugin add golang && asdf install golang
 npm install -g @anthropic-ai/claude-code @mariozechner/pi-coding-agent @tobilu/qmd
 ```
 
-| Tool | What it does |
-|------|-------------|
-| `claude-code` | Claude CLI agent |
+| Tool              | What it does                                                     |
+| ----------------- | ---------------------------------------------------------------- |
+| `claude-code`     | Claude CLI agent                                                 |
 | `pi-coding-agent` | Pi coding agent TUI (extensible, shares skills with Claude Code) |
-| `qmd` | Semantic search over markdown (used by vault hooks and skills) |
+| `qmd`             | Semantic search over markdown (used by vault hooks and skills)   |
 
 ### 9. Obsidian vault
 
@@ -188,20 +188,21 @@ make sync-claude    # Sync portable Claude settings into settings.json
 
 ## Packages
 
-| Package | What it manages |
-|---------|----------------|
-| `zsh` | `.zshenv`, `.zprofile`, `.zshrc`, `.profile` |
-| `git` | `.gitconfig`, `.gitignore_global` |
-| `tmux` | `.tmux.conf` |
-| `tool-versions` | `.tool-versions` (mise/asdf runtime versions) |
-| `nvim` | `.config/nvim/` (full Neovim config) |
-| `claude` | `.mcp.json`, `.claude/` (settings, hooks, skills) |
-| `pi` | `.pi/agent/` (settings, themes, extensions, agents, skills) |
-| `direnv` | `.config/direnv/direnv.toml` |
-| `ssh` | `.ssh/config` (Include directives only) |
-| `local-bin` | `.local/bin/` (annotation buffer scripts, tmux-pi-status) |
-| `tig` | `.tigrc` (tig git browser config) |
-| `ghostty` | `.config/ghostty/config` (terminal emulator) |
+| Package         | What it manages                                             |
+| --------------- | ----------------------------------------------------------- |
+| `zsh`           | `.zshenv`, `.zprofile`, `.zshrc`, `.profile`                |
+| `git`           | `.gitconfig`, `.gitignore_global`                           |
+| `tmux`          | `.tmux.conf`                                                |
+| `tool-versions` | `.tool-versions` (mise/asdf runtime versions)               |
+| `nvim`          | `.config/nvim/` (full Neovim config)                        |
+| `claude`        | `.mcp.json`, `.claude/` (settings, hooks, skills)           |
+| `pi`            | `.pi/agent/` (settings, themes, extensions, agents, skills) |
+| `direnv`        | `.config/direnv/direnv.toml`                                |
+| `ssh`           | `.ssh/config` (Include directives only)                     |
+| `local-bin`     | `.local/bin/` (annotation buffer scripts, tmux-pi-status)   |
+| `tig`           | `.tigrc` (tig git browser config)                           |
+| `ghostty`       | `.config/ghostty/config` (terminal emulator)                |
+| `sioyek`        | `.config/sioyek/keys_user.config` (PDF reader, vim keys)    |
 
 ## Claude Code
 
@@ -214,28 +215,28 @@ The `claude` stow package manages hooks, skills, MCP servers, and portable setti
 
 ### Hooks
 
-| Hook | Trigger | What it does |
-|------|---------|-------------|
-| `vault-session-load.sh` | SessionStart | Loads last session recap + related vault notes (score >= 70%) |
-| `notify-ready.sh` | Stop, Notification | macOS notification + sound + tmux window highlight when Claude finishes in a background window |
-| `worklog-capture.py` | Stop | Appends a raw record of each turn (project, branch, edits, commits, summary) to `~/vault/work/raw/YYYY-MM-DD.jsonl`. No LLM call. Consolidated by `/eod` |
+| Hook                    | Trigger            | What it does                                                                                                                                             |
+| ----------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vault-session-load.sh` | SessionStart       | Loads last session recap + related vault notes (score >= 70%)                                                                                            |
+| `notify-ready.sh`       | Stop, Notification | macOS notification + sound + tmux window highlight when Claude finishes in a background window                                                           |
+| `worklog-capture.py`    | Stop               | Appends a raw record of each turn (project, branch, edits, commits, summary) to `~/vault/work/raw/YYYY-MM-DD.jsonl`. No LLM call. Consolidated by `/eod` |
 
 ### Skills
 
-| Skill | What it does |
-|-------|-------------|
-| `/vault` | Search and retrieve notes from Obsidian vault |
-| `/note` | Capture ideas, TILs, or drafts to the vault |
-| `/recap` | Save session learnings to the vault |
-| `/brainstorm` | Develop blog post ideas into outlines |
-| `/task` | Manage tasks across roadmap, sprint, pomodoro, routines |
-| `/pair` | TDD pair programming with mode switching (driver/navigator) |
-| `/skill-creator` | Create and test new skills |
-| `/pair-review` | Interactive pair review of a PR |
-| `/qa` | Smoke-test changes in the browser, validate behavior, plan fixes |
-| `/browser` | Browser automation via agent-browser CLI |
-| `/eod` | Consolidate the day's raw work log into `~/vault/work/daily/` with a ready-to-read block for the daily standup |
-| `/sprint-recap` | Consolidate daily notes of a date range into `~/vault/work/sprints/`, grouped by ticket |
+| Skill            | What it does                                                                                                   |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `/vault`         | Search and retrieve notes from Obsidian vault                                                                  |
+| `/note`          | Capture ideas, TILs, or drafts to the vault                                                                    |
+| `/recap`         | Save session learnings to the vault                                                                            |
+| `/brainstorm`    | Develop blog post ideas into outlines                                                                          |
+| `/task`          | Manage tasks across roadmap, sprint, pomodoro, routines                                                        |
+| `/pair`          | TDD pair programming with mode switching (driver/navigator)                                                    |
+| `/skill-creator` | Create and test new skills                                                                                     |
+| `/pair-review`   | Interactive pair review of a PR                                                                                |
+| `/qa`            | Smoke-test changes in the browser, validate behavior, plan fixes                                               |
+| `/browser`       | Browser automation via agent-browser CLI                                                                       |
+| `/eod`           | Consolidate the day's raw work log into `~/vault/work/daily/` with a ready-to-read block for the daily standup |
+| `/sprint-recap`  | Consolidate daily notes of a date range into `~/vault/work/sprints/`, grouped by ticket                        |
 
 `~/.claude/skills` is a directory-level symlink. New skills added to `claude/.claude/skills/` appear automatically without restow.
 
@@ -243,9 +244,9 @@ All Claude Code skills also work in pi via shared skill paths (see [Pi > Skill s
 
 ### LSP
 
-| Plugin | Binary it needs | Installed by |
-|--------|----------------|--------------|
-| `gopls-lsp@claude-plugins-official` | `gopls` | mise (`.tool-versions`) |
+| Plugin                              | Binary it needs | Installed by            |
+| ----------------------------------- | --------------- | ----------------------- |
+| `gopls-lsp@claude-plugins-official` | `gopls`         | mise (`.tool-versions`) |
 
 The plugin is enabled in `settings.local.json` and so reaches every machine, but it ships no binary — it just tells Claude Code to spawn `gopls` for `.go` files. Without `gopls` on PATH, every LSP call fails with `ENOENT: gopls`. `make deps` verifies it.
 
@@ -253,8 +254,8 @@ Claude Code reads PATH once, at launch. After installing gopls, **restart Claude
 
 ### MCP servers
 
-| Server | Source | What it does |
-|--------|--------|-------------|
+| Server            | Source        | What it does                                 |
+| ----------------- | ------------- | -------------------------------------------- |
 | `chrome-devtools` | `~/.mcp.json` | Browser automation for testing and debugging |
 
 ### Vault dependency
@@ -267,28 +268,28 @@ Skills and hooks depend on `qmd` for semantic search over the Obsidian vault. Th
 
 Review tmux output without scroll fatigue. Each tmux window gets its own buffer (`/tmp/abuf-{session}-{window}.md`). Both `a` (copy mode) and `prefix + B` open the same vim popup on the buffer.
 
-| Script | What it does |
-|--------|-------------|
-| `abuf-edit` | Opens vim popup on the buffer, appends quoted selection if available |
-| `abuf-paste` | Pastes buffer into the current pane via send-keys |
-| `abuf-clear` | Clears the current window's buffer |
+| Script       | What it does                                                         |
+| ------------ | -------------------------------------------------------------------- |
+| `abuf-edit`  | Opens vim popup on the buffer, appends quoted selection if available |
+| `abuf-paste` | Pastes buffer into the current pane via send-keys                    |
+| `abuf-clear` | Clears the current window's buffer                                   |
 
 ### Pi Tmux Status
 
-| Script | What it does |
-|--------|-------------|
+| Script              | What it does                                                            |
+| ------------------- | ----------------------------------------------------------------------- |
 | `tmux-pi-status.sh` | Reads pi session status for active pane, displayed in tmux status-right |
 
 Written by the `tmux-status.ts` pi extension, read by tmux every second.
 
 ### Annotation Buffer Keybindings
 
-| Key | Context | Action |
-|-----|---------|--------|
-| `a` | copy mode | Appends selection (if any) to buffer, opens vim popup |
-| `prefix + B` | normal | Opens buffer in vim popup (edit, delete, organize) |
-| `prefix + S` | normal | Paste buffer into current pane (does not clear buffer) |
-| `prefix + Ctrl-x` | normal | Clear buffer (asks for confirmation) |
+| Key               | Context   | Action                                                 |
+| ----------------- | --------- | ------------------------------------------------------ |
+| `a`               | copy mode | Appends selection (if any) to buffer, opens vim popup  |
+| `prefix + B`      | normal    | Opens buffer in vim popup (edit, delete, organize)     |
+| `prefix + S`      | normal    | Paste buffer into current pane (does not clear buffer) |
+| `prefix + Ctrl-x` | normal    | Clear buffer (asks for confirmation)                   |
 
 ### Annotation Buffer Workflow
 
@@ -306,41 +307,41 @@ Leader is `;` (semicolon). Full reference in [`nvim/.config/nvim/README.md`](nvi
 
 ### Search and navigation
 
-| Key | Action |
-|-----|--------|
+| Key      | Action                        |
+| -------- | ----------------------------- |
 | `Ctrl-p` | Find files (frecency ranking) |
-| `Ctrl-f` | Live grep across project |
-| `Ctrl-i` | Recent files |
-| `;;` | Open buffers |
-| `;n` | Toggle file tree |
-| `;k` | Reveal current file in tree |
-| `;sg` | Grep with preview |
-| `;sd` | Search diagnostics |
+| `Ctrl-f` | Live grep across project      |
+| `Ctrl-i` | Recent files                  |
+| `;;`     | Open buffers                  |
+| `;n`     | Toggle file tree              |
+| `;k`     | Reveal current file in tree   |
+| `;sg`    | Grep with preview             |
+| `;sd`    | Search diagnostics            |
 
 ### LSP (works out of the box for Rust and Lua)
 
-| Key | Action |
-|-----|--------|
-| `gd` | Go to definition |
-| `gr` | Find all references |
-| `gI` | Go to implementation |
-| `K` | Hover docs (type info, signature) |
-| `;rn` | Rename symbol across project |
+| Key   | Action                             |
+| ----- | ---------------------------------- |
+| `gd`  | Go to definition                   |
+| `gr`  | Find all references                |
+| `gI`  | Go to implementation               |
+| `K`   | Hover docs (type info, signature)  |
+| `;rn` | Rename symbol across project       |
 | `;ca` | Code actions (quick fix, refactor) |
-| `;th` | Toggle inlay hints |
-| `;f` | Format buffer |
+| `;th` | Toggle inlay hints                 |
+| `;f`  | Format buffer                      |
 
 ### Git
 
-| Key | Action |
-|-----|--------|
-| `;gs` | Git status |
-| `;gb` | Git branches |
-| `;gc` | Git log |
-| `;hs` | Stage hunk |
-| `;hr` | Reset hunk |
-| `;hb` | Blame current line |
-| `]c` / `[c` | Next/prev change |
+| Key         | Action             |
+| ----------- | ------------------ |
+| `;gs`       | Git status         |
+| `;gb`       | Git branches       |
+| `;gc`       | Git log            |
+| `;hs`       | Stage hunk         |
+| `;hr`       | Reset hunk         |
+| `;hb`       | Blame current line |
+| `]c` / `[c` | Next/prev change   |
 
 ### Example: navigating a Rust project
 
@@ -371,12 +372,12 @@ The `pi` stow package manages settings, themes, agents, and pi-only skills.
 
 pi does **not** load Claude Code hooks (`settings.local.json`). The equivalent functionality lives in TypeScript extensions using pi's `ExtensionAPI`.
 
-| Extension | What it does |
-|-----------|-------------|
-| `tmux-notify.ts` | Sound + tmux window/session highlight when pi finishes in a background pane |
-| `tmux-status.ts` | Writes model, thinking level, context %, tokens, cost to tmux status bar |
-| `subagent/` | Multi-agent orchestration. Spawns isolated pi subprocesses. Supports single, parallel (max 8), and chain modes |
-| `plan-mode/` | Read-only exploration mode. Restricts tools, extracts numbered plans, tracks step completion |
+| Extension        | What it does                                                                                                   |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `tmux-notify.ts` | Sound + tmux window/session highlight when pi finishes in a background pane                                    |
+| `tmux-status.ts` | Writes model, thinking level, context %, tokens, cost to tmux status bar                                       |
+| `subagent/`      | Multi-agent orchestration. Spawns isolated pi subprocesses. Supports single, parallel (max 8), and chain modes |
+| `plan-mode/`     | Read-only exploration mode. Restricts tools, extracts numbered plans, tracks step completion                   |
 
 The tmux status bar reads pi session info via `tmux-pi-status.sh` (in `local-bin` package), refreshed every second.
 
@@ -386,11 +387,11 @@ The tmux status bar reads pi session info via `tmux-pi-status.sh` (in `local-bin
 
 Spawns isolated `pi` subprocesses with delegated system prompts. Three modes:
 
-| Mode | Usage | Description |
-|------|-------|-------------|
-| Single | `subagent({ agent, task })` | One agent, one task |
+| Mode     | Usage                        | Description                                            |
+| -------- | ---------------------------- | ------------------------------------------------------ |
+| Single   | `subagent({ agent, task })`  | One agent, one task                                    |
 | Parallel | `subagent({ tasks: [...] })` | Multiple agents run concurrently (max 8, 4 concurrent) |
-| Chain | `subagent({ chain: [...] })` | Sequential, `{previous}` passes output between steps |
+| Chain    | `subagent({ chain: [...] })` | Sequential, `{previous}` passes output between steps   |
 
 Agents are discovered automatically from `~/.pi/agent/agents/*.md` (user-level) and `.pi/agents/*.md` (project-level, opt-in via `agentScope: "both"`). Each agent is a markdown file with YAML frontmatter:
 
@@ -409,11 +410,11 @@ System prompt goes here.
 
 Read-only exploration mode for safe code analysis.
 
-| Command | Action |
-|---------|--------|
-| `/plan` | Toggle plan mode (read-only ↔ full access) |
-| `/todos` | Show current plan progress |
-| `Ctrl+Alt+P` | Toggle plan mode (shortcut) |
+| Command      | Action                                     |
+| ------------ | ------------------------------------------ |
+| `/plan`      | Toggle plan mode (read-only ↔ full access) |
+| `/todos`     | Show current plan progress                 |
+| `Ctrl+Alt+P` | Toggle plan mode (shortcut)                |
 
 In plan mode, only read-only tools are available (read, grep, find, ls) and bash commands are filtered through an allowlist (cat, head, tail, git status, git log, git diff, etc). The agent creates a numbered plan, then on execution full access is restored and progress is tracked with `[DONE:n]` markers.
 
@@ -421,32 +422,33 @@ In plan mode, only read-only tools are available (read, grep, find, ls) and bash
 
 Subagent definitions used by the review and dev skills. Each spawns an isolated `pi` subprocess.
 
-| Agent | Model | Role |
-|-------|-------|------|
-| `scout` | haiku | Fast codebase recon, compressed context |
-| `security-reviewer` | sonnet | Auth, injection, SSRF, race conditions |
-| `performance-reviewer` | sonnet | N+1, allocations, hot loops, blocking I/O |
-| `quality-reviewer` | sonnet | DDD, SOLID, testing, clean code, patterns |
-| `review-auditor` | sonnet | Red team, verifies findings against code and rules |
+| Agent                  | Model  | Role                                               |
+| ---------------------- | ------ | -------------------------------------------------- |
+| `scout`                | haiku  | Fast codebase recon, compressed context            |
+| `security-reviewer`    | sonnet | Auth, injection, SSRF, race conditions             |
+| `performance-reviewer` | sonnet | N+1, allocations, hot loops, blocking I/O          |
+| `quality-reviewer`     | sonnet | DDD, SOLID, testing, clean code, patterns          |
+| `review-auditor`       | sonnet | Red team, verifies findings against code and rules |
 
 ### Skills (pi-only)
 
 These use pi-specific features (subagents) and don't conflict with Claude Code skills.
 
-| Skill | What it does |
-|-------|--------------|
-| `/skill:po` | Product owner: scout codebase, write PRD, publish to docs/GitHub/Linear |
-| `/skill:dev` | Senior engineer: scout → questions → test proposal → 5 TDD pairing modes |
-| `/skill:review` | 3 parallel reviewers → red team audit → user judgment → fix or report |
-| `/skill:commit` | Conventional commits + `--pr` for draft PRs via `gh` CLI |
+| Skill           | What it does                                                             |
+| --------------- | ------------------------------------------------------------------------ |
+| `/skill:po`     | Product owner: scout codebase, write PRD, publish to docs/GitHub/Linear  |
+| `/skill:dev`    | Senior engineer: scout → questions → test proposal → 5 TDD pairing modes |
+| `/skill:review` | 3 parallel reviewers → red team audit → user judgment → fix or report    |
+| `/skill:commit` | Conventional commits + `--pr` for draft PRs via `gh` CLI                 |
 
 ### Skill sharing
 
 Pi loads skills from two sources:
+
 1. **Shared**: `"skills": ["~/.claude/skills"]` in settings.json (all Claude Code skills)
 2. **Pi-only**: `~/.pi/agent/skills/` (agents, subagent workflows)
 
-## Not tracked
+## Not tracked atualizou
 
 - `~/.secrets/env` - API tokens sourced by `.zshrc`
 - `~/.zshrc.local` - machine-specific shell config
@@ -454,3 +456,5 @@ Pi loads skills from two sources:
 - `~/.ssh/config.d/*` - host-specific SSH entries
 - `~/vault` - Obsidian vault symlink to iCloud (content not in this repo)
 - `~/bin/*` - project-specific scripts
+
+### Testando nova tool

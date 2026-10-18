@@ -7,6 +7,22 @@
 -- file at a time.
 -- See: https://github.com/sindrets/diffview.nvim
 
+-- `base...HEAD` diffs from the merge-base, so only what the current
+-- branch added shows up: the same diff GitHub renders for a PR.
+local function diff_against(base)
+  vim.cmd('DiffviewOpen ' .. base .. '...HEAD')
+end
+
+-- The remote's default branch (main, master, ...), as `origin/<name>`.
+-- `origin/HEAD` is only set on clones; fall back to origin/main.
+local function default_branch()
+  local ref = vim.fn.systemlist({ 'git', 'symbolic-ref', '--short', 'refs/remotes/origin/HEAD' })[1]
+  if vim.v.shell_error ~= 0 or not ref or ref == '' then
+    return 'origin/main'
+  end
+  return ref
+end
+
 return {
   'sindrets/diffview.nvim',
 
@@ -25,6 +41,29 @@ return {
         end
       end,
       desc = '[G]it [D]iffview (all changes)',
+    },
+    {
+      '<leader>gm',
+      function()
+        diff_against(default_branch())
+      end,
+      desc = '[G]it diff vs [M]ain (branch as a PR)',
+    },
+    {
+      '<leader>gD',
+      function()
+        -- Pick any local or remote branch; confirm diffs instead of checking out
+        Snacks.picker.git_branches {
+          all = true,
+          confirm = function(picker, item)
+            picker:close()
+            if item and item.branch then
+              diff_against((item.branch:gsub('^remotes/', '')))
+            end
+          end,
+        }
+      end,
+      desc = '[G]it [D]iff vs branch (picker)',
     },
     { '<leader>gh', '<cmd>DiffviewFileHistory %<cr>', desc = '[G]it file [H]istory' },
     { '<leader>gH', '<cmd>DiffviewFileHistory<cr>', desc = '[G]it repo [H]istory' },

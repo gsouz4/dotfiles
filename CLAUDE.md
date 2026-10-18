@@ -37,7 +37,7 @@ Personal dotfiles managed with GNU Stow. Each top-level directory is a stow pack
 
 ## Packages
 
-`zsh`, `git`, `tmux`, `tool-versions`, `nvim`, `claude`, `pi`, `direnv`, `ssh`, `local-bin`, `ghostty`, `tig`
+`zsh`, `git`, `tmux`, `tool-versions`, `nvim`, `claude`, `pi`, `direnv`, `ssh`, `local-bin`, `ghostty`, `tig`, `sioyek`
 
 ## Working on this repo
 

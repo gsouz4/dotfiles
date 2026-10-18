@@ -41,6 +41,26 @@ return {
   },
 
   -- =================================================================
+  -- mdview (prototype): GitHub-style render inside nvim
+  -- =================================================================
+  -- Local project. A Rust process (comrak + Blitz) renders the buffer
+  -- with GitHub's CSS and the pixels are drawn into a side split over the
+  -- kitty graphics protocol. Re-renders on every edit, follows scrolling.
+  -- Skipped on machines without the checkout.
+  {
+    dir = vim.fn.expand '~/Documents/mdview',
+    name = 'mdview',
+    cond = function()
+      return vim.fn.has 'nvim-0.12' == 1 and vim.uv.fs_stat(vim.fn.expand '~/Documents/mdview') ~= nil
+    end,
+    build = 'cargo build --release',
+    cmd = 'MdviewToggle',
+    keys = {
+      { '<leader>mv', '<cmd>MdviewToggle<CR>', desc = '[M]arkdown [V]iew (GitHub render in split)' },
+    },
+  },
+
+  -- =================================================================
   -- GitHub-style live preview (real HTML in the browser)
   -- =================================================================
   -- md-render above draws inside terminal cells; this one serves the
